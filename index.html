@@ -23,6 +23,8 @@
             --fan-center: #1e293b;
             --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
             --btn-hover: rgba(255, 255, 255, 1);
+            --success: #10b981;
+            --danger: #ef4444;
         }
 
         [data-theme="dark"] {
@@ -68,219 +70,125 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             position: relative;
-            overflow: hidden;
         }
 
         .theme-toggle {
-            position: absolute;
-            top: 30px;
-            right: 25px;
-            background: var(--btn-bg);
-            border: 1px solid var(--card-border);
-            color: var(--text-main);
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            font-size: 18px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            position: absolute; top: 30px; right: 25px;
+            background: var(--btn-bg); border: 1px solid var(--card-border);
+            color: var(--text-main); width: 45px; height: 45px;
+            border-radius: 50%; font-size: 18px; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: all 0.3s ease;
         }
-        .theme-toggle:hover { background: var(--btn-hover); transform: rotate(15deg) scale(1.05); }
         .theme-toggle:active { transform: scale(0.9); }
 
         .header { margin-bottom: 30px; }
         .header h1 { font-size: 28px; margin: 0; color: var(--primary); font-weight: 700; letter-spacing: -0.5px; }
-        .header p { font-size: 14px; color: var(--text-sub); margin: 5px 0 0 0; font-weight: 400; }
+        .header p { font-size: 14px; color: var(--text-sub); margin: 5px 0 0 0; }
 
         .main-dashboard {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 25px;
-            background: rgba(0, 0, 0, 0.02);
-            border-radius: 30px;
-            padding: 25px;
-            border: 1px solid var(--card-border);
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 20px; background: rgba(0, 0, 0, 0.02);
+            border-radius: 30px; padding: 25px; border: 1px solid var(--card-border);
         }
         [data-theme="dark"] .main-dashboard { background: rgba(0, 0, 0, 0.2); }
 
-        .fan-wrapper {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            position: relative;
-        }
-        
+        .fan-wrapper { flex: 1; display: flex; justify-content: center; position: relative; }
         .fan-glow {
-            position: absolute;
-            width: 100px;
-            height: 100px;
-            background: transparent;
-            border-radius: 50%;
-            top: 20px;
-            filter: blur(25px);
-            transition: background 0.5s ease;
-            z-index: 0;
+            position: absolute; width: 100px; height: 100px; background: transparent;
+            border-radius: 50%; top: 20px; filter: blur(25px); transition: background 0.5s ease; z-index: 0;
         }
-
-        .stand-fan { height: 170px; width: auto; z-index: 1; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
+        .stand-fan { height: 170px; z-index: 1; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1)); }
         .blades { transform-origin: 50px 50px; transition: fill 0.4s ease; }
-        
         .spin-1 { animation: spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-        .spin-1 .blade-part { fill: #10b981; } 
+        .spin-1 .blade-part { fill: var(--success); } 
         .spin-2 { animation: spin 0.6s linear infinite; }
         .spin-2 .blade-part { fill: #f59e0b; } 
         .spin-3 { animation: spin 0.15s linear infinite; }
-        .spin-3 .blade-part { fill: #ef4444; } 
+        .spin-3 .blade-part { fill: var(--danger); } 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .controls-vertical {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            width: 70px;
-        }
+        .controls-vertical { display: flex; flex-direction: column; gap: 10px; width: 70px; }
         .btn-speed {
-            height: 42px;
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            font-size: 16px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 700;
-            cursor: pointer;
-            background: var(--btn-bg);
-            color: var(--btn-text);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-            transition: all 0.3s ease;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            backdrop-filter: blur(10px);
+            height: 42px; border: 1px solid var(--card-border); border-radius: 14px;
+            font-size: 16px; font-weight: 700; cursor: pointer; background: var(--btn-bg);
+            color: var(--btn-text); transition: all 0.3s ease; backdrop-filter: blur(10px);
         }
-        .btn-speed:hover { background: var(--btn-hover); transform: translateY(-2px); }
-        .btn-speed:active { transform: translateY(1px) scale(0.95); }
-        
+        .btn-speed:active { transform: scale(0.95); }
         .btn-speed.active { color: white; box-shadow: 0 8px 20px var(--primary-glow); }
-        
-        #btn-3.active { background: #ef4444; border-color: #ef4444; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); }
-        #btn-2.active { background: #f59e0b; border-color: #f59e0b; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4); }
-        #btn-1.active { background: #10b981; border-color: #10b981; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
+        #btn-3.active { background: var(--danger); border-color: var(--danger); box-shadow: 0 8px 20px rgba(239,68,68,0.4); }
+        #btn-2.active { background: #f59e0b; border-color: #f59e0b; box-shadow: 0 8px 20px rgba(245,158,11,0.4); }
+        #btn-1.active { background: var(--success); border-color: var(--success); box-shadow: 0 8px 20px rgba(16,185,129,0.4); }
         #btn-natural { font-size: 14px; }
-        #btn-natural.active { background: #06b6d4; border-color: #06b6d4; box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4); color: white; }
-        .btn-off.active { background: #ef4444; border-color: #ef4444; color: white; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+        #btn-natural.active { background: #06b6d4; border-color: #06b6d4; box-shadow: 0 8px 20px rgba(6,182,212,0.4); color: white; }
+        .btn-off.active { background: var(--danger); border-color: var(--danger); color: white; }
 
         .status-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-            margin-bottom: 30px;
-            background: var(--btn-bg);
-            padding: 15px;
-            border-radius: 20px;
-            border: 1px solid var(--card-border);
+            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            margin-bottom: 20px; background: var(--btn-bg); padding: 15px;
+            border-radius: 20px; border: 1px solid var(--card-border);
         }
-        .status-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .led-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background-color: var(--text-sub);
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            transition: all 0.4s ease;
-        }
+        .status-bar { display: flex; align-items: center; gap: 10px; font-size: 14px; font-weight: 600; }
+        .led-dot { width: 10px; height: 10px; border-radius: 50%; background-color: var(--text-sub); transition: all 0.4s; }
         .uptime-label { font-size: 12px; color: var(--text-sub); font-weight: 500; display: none; }
 
-        .timer-section {
-            background: var(--btn-bg);
-            padding: 25px;
-            border-radius: 30px;
-            border: 1px solid var(--card-border);
+        /* Timer Section (Compact & Tabbed) */
+        .timer-module {
+            background: var(--btn-bg); border-radius: 25px; border: 1px solid var(--card-border);
+            overflow: hidden; display: flex; flex-direction: column;
         }
-        .timer-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--text-main);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+        .timer-tabs { display: flex; border-bottom: 1px solid var(--card-border); }
+        .timer-tabs button {
+            flex: 1; padding: 12px; background: transparent; border: none; color: var(--text-sub);
+            font-weight: 600; font-family: 'Inter', sans-serif; cursor: pointer; transition: 0.3s;
         }
-        
-        /* Time Picker Inputs */
-        .time-picker {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .time-col {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 6px;
-        }
-        .time-col label { font-size: 12px; color: var(--text-sub); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
-        .time-col input {
-            width: 65px;
-            height: 55px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            text-align: center;
-            font-size: 22px;
-            font-weight: 600;
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            outline: none;
-            transition: 0.3s;
-        }
-        .time-col input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-        .time-separator { font-size: 24px; font-weight: 600; color: var(--text-sub); margin-top: 15px; }
-        
-        /* Hide arrows on number inputs */
-        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
-        input[type=number] { -moz-appearance: textfield; }
+        .timer-tabs button.active { color: var(--primary); background: rgba(99, 102, 241, 0.05); }
+        .timer-tabs button#tab-off.active { color: var(--danger); }
+        .timer-tabs button#tab-on.active { color: var(--success); }
 
-        .btn-timer {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 14px;
-            font-family: 'Inter', sans-serif;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.3s;
-            box-shadow: 0 4px 15px var(--primary-glow);
-        }
-        .btn-timer:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--primary-glow); }
-        .btn-timer:active { transform: scale(0.95); }
+        .timer-body { padding: 20px; }
         
-        .btn-cancel { 
-            background: rgba(239, 68, 68, 0.1); 
-            color: #ef4444; 
-            margin-top: 10px; 
-            box-shadow: none;
-            border: 1px solid rgba(239, 68, 68, 0.3);
+        .mode-toggles {
+            display: flex; background: var(--card-bg); border-radius: 12px; padding: 4px; margin-bottom: 15px;
         }
-        .btn-cancel:hover { background: rgba(239, 68, 68, 0.2); box-shadow: none; }
-        
-        .status-text { text-align: center; font-size: 13px; color: var(--primary); min-height: 20px; margin-top: 15px; font-weight: 500; }
+        .mode-toggles label {
+            flex: 1; text-align: center; padding: 8px; font-size: 13px; font-weight: 500;
+            cursor: pointer; border-radius: 8px; transition: 0.3s; color: var(--text-sub);
+        }
+        .mode-toggles input { display: none; }
+        .mode-toggles label.active { background: var(--btn-bg); color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+
+        /* Compact Time Inputs */
+        .compact-time-picker { display: flex; justify-content: center; gap: 8px; align-items: center; margin-bottom: 15px; }
+        .input-group { display: flex; align-items: center; background: var(--card-bg); border-radius: 10px; border: 1px solid var(--card-border); padding: 5px; }
+        .input-group input {
+            width: 35px; background: transparent; border: none; text-align: center; font-size: 16px; font-weight: 600; color: var(--text-main); outline: none; -moz-appearance: textfield;
+        }
+        .input-group input::-webkit-outer-spin-button, .input-group input::-webkit-inner-spin-button { -webkit-appearance: none; }
+        .input-group span { font-size: 12px; color: var(--text-sub); margin-right: 5px; }
+
+        .exact-time-picker { text-align: center; margin-bottom: 15px; display: none; }
+        .exact-time-picker input {
+            padding: 10px 15px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--card-border);
+            color: var(--text-main); font-size: 18px; font-weight: 600; outline: none; font-family: 'Inter', sans-serif;
+        }
+
+        .btn-set-timer {
+            width: 100%; padding: 12px; border: none; border-radius: 12px; font-weight: 600;
+            color: white; cursor: pointer; transition: 0.3s;
+        }
+        .btn-set-off { background: var(--danger); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+        .btn-set-on { background: var(--success); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); display: none; }
+        .btn-set-timer:active { transform: scale(0.95); }
+
+        /* Active Timers Dashboard */
+        .active-timers { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .timer-badge {
+            display: flex; justify-content: space-between; align-items: center; padding: 10px 15px;
+            border-radius: 12px; font-size: 13px; font-weight: 500; display: none;
+        }
+        .timer-badge.off { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+        .timer-badge.on { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .btn-cancel-mini { background: transparent; border: none; color: inherit; cursor: pointer; padding: 5px; }
     </style>
 </head>
 <body>
@@ -302,7 +210,6 @@
                 <rect x="45" y="85" width="10" height="15" fill="var(--fan-stand)" rx="2"/>
                 <circle cx="50" cy="50" r="16" fill="var(--fan-stand)"/>
                 <circle cx="50" cy="50" r="42" fill="none" stroke="var(--fan-stand)" stroke-width="1.5" opacity="0.6"/>
-                
                 <g class="blades" id="fan-blades">
                     <ellipse cx="50" cy="22" rx="10" ry="24" class="blade-part" fill="var(--fan-blade)" />
                     <ellipse cx="50" cy="78" rx="10" ry="24" class="blade-part" fill="var(--fan-blade)" />
@@ -310,12 +217,7 @@
                     <ellipse cx="78" cy="50" rx="24" ry="10" class="blade-part" fill="var(--fan-blade)" />
                     <circle cx="50" cy="50" r="7" fill="var(--fan-center)"/>
                 </g>
-
                 <circle cx="50" cy="50" r="44" fill="none" stroke="var(--fan-stand)" stroke-width="2"/>
-                <circle cx="50" cy="50" r="30" fill="none" stroke="var(--fan-stand)" stroke-width="1" opacity="0.5"/>
-                <circle cx="50" cy="50" r="16" fill="none" stroke="var(--fan-stand)" stroke-width="1" opacity="0.5"/>
-                <line x1="50" y1="6" x2="50" y2="94" stroke="var(--fan-stand)" stroke-width="1" opacity="0.5"/>
-                <line x1="6" y1="50" x2="94" y2="50" stroke="var(--fan-stand)" stroke-width="1" opacity="0.5"/>
             </svg>
         </div>
 
@@ -336,64 +238,71 @@
         <div class="uptime-label" id="uptime-label">Active for: 00:00:00</div>
     </div>
 
-    <div class="timer-section">
-        <div class="timer-title"><i class="fa-solid fa-stopwatch"></i> Auto-Off Timer</div>
-        
-        <div class="time-picker">
-            <div class="time-col">
-                <label>Hrs</label>
-                <input type="number" id="t-hours" min="0" max="23" value="0" onfocus="this.select()">
-            </div>
-            <div class="time-separator">:</div>
-            <div class="time-col">
-                <label>Mins</label>
-                <input type="number" id="t-mins" min="0" max="59" value="30" onfocus="this.select()">
-            </div>
-            <div class="time-separator">:</div>
-            <div class="time-col">
-                <label>Secs</label>
-                <input type="number" id="t-secs" min="0" max="59" value="0" onfocus="this.select()">
-            </div>
+    <div class="timer-module">
+        <div class="timer-tabs">
+            <button id="tab-off" class="active" onclick="switchTab('off')">Auto-OFF (ปิด)</button>
+            <button id="tab-on" onclick="switchTab('on')">Auto-ON (เปิด)</button>
         </div>
+        
+        <div class="timer-body">
+            <div class="mode-toggles">
+                <label class="active" id="lbl-cd" onclick="switchMode('cd')">
+                    <input type="radio" name="t-mode" value="cd" checked> Countdown
+                </label>
+                <label id="lbl-time" onclick="switchMode('time')">
+                    <input type="radio" name="t-mode" value="time"> Exact Time
+                </label>
+            </div>
 
-        <button class="btn-timer" onclick="startCustomTimer()" id="btn-start-timer">Start Timer</button>
-        <button class="btn-timer btn-cancel" onclick="cancelTimer()" style="display: none;" id="btn-cancel"><i class="fa-solid fa-xmark"></i> Cancel Timer</button>
+            <div class="compact-time-picker" id="ui-cd">
+                <div class="input-group"><input type="number" id="cd-h" value="0" min="0"><span>h</span></div>
+                <div class="input-group"><input type="number" id="cd-m" value="30" min="0" max="59"><span>m</span></div>
+                <div class="input-group"><input type="number" id="cd-s" value="0" min="0" max="59"><span>s</span></div>
+            </div>
 
-        <div class="status-text" id="timer-status"></div>
+            <div class="exact-time-picker" id="ui-time">
+                <input type="time" id="exact-time">
+            </div>
+
+            <button class="btn-set-timer btn-set-off" id="btn-submit-off" onclick="startTimer('off')">Set Auto-OFF</button>
+            <button class="btn-set-timer btn-set-on" id="btn-submit-on" onclick="startTimer('on')">Set Auto-ON</button>
+        </div>
     </div>
+
+    <div class="active-timers">
+        <div class="timer-badge off" id="badge-off">
+            <span><i class="fa-regular fa-clock"></i> Turning OFF in: <b id="text-off"></b></span>
+            <button class="btn-cancel-mini" onclick="cancelTimer('off')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <div class="timer-badge on" id="badge-on">
+            <span><i class="fa-regular fa-clock"></i> Turning ON in: <b id="text-on"></b></span>
+            <button class="btn-cancel-mini" onclick="cancelTimer('on')"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
 </div>
 
 <script>
     const BLYNK_AUTH_TOKEN = "XBzHPWNzCK_7bRzeVCQcleCkrb8we3TS"; 
     const BLYNK_SERVER = "blynk.cloud"; 
 
-    // Theme Management
+    // 1. Theme Management
     const htmlEl = document.documentElement;
     const themeBtn = document.getElementById('theme-btn');
     if(localStorage.getItem('theme') === 'light') {
-        htmlEl.setAttribute('data-theme', 'light');
-        themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-    } else {
-        htmlEl.setAttribute('data-theme', 'dark');
-        themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
+        htmlEl.setAttribute('data-theme', 'light'); themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
     }
-
     function toggleTheme() {
         if(navigator.vibrate) navigator.vibrate(30);
         if(htmlEl.getAttribute('data-theme') === 'light') {
-            htmlEl.setAttribute('data-theme', 'dark');
-            themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>';
-            localStorage.setItem('theme', 'dark');
+            htmlEl.setAttribute('data-theme', 'dark'); themeBtn.innerHTML = '<i class="fa-solid fa-sun"></i>'; localStorage.setItem('theme', 'dark');
         } else {
-            htmlEl.setAttribute('data-theme', 'light');
-            themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>';
-            localStorage.setItem('theme', 'light');
+            htmlEl.setAttribute('data-theme', 'light'); themeBtn.innerHTML = '<i class="fa-solid fa-moon"></i>'; localStorage.setItem('theme', 'light');
         }
     }
 
-    // Uptime Management
-    let turnOnTime = null;
-    let uptimeInterval = null;
+    // 2. Fan Core System (Uptime & Natural Wind)
+    let turnOnTime = null, uptimeInterval = null, naturalMode = false, naturalInterval = null;
 
     function updateUptime() {
         if (!turnOnTime) return;
@@ -401,42 +310,21 @@
         const h = Math.floor(diff / 3600).toString().padStart(2, '0');
         const m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
         const s = (diff % 60).toString().padStart(2, '0');
-        
-        let displayStr = "Active for: ";
-        if (h > 0) displayStr += `${h}h `;
-        displayStr += `${m}m ${s}s`;
-        document.getElementById('uptime-label').innerText = displayStr;
+        document.getElementById('uptime-label').innerText = `Active for: ${h > 0 ? h+'h ' : ''}${m}m ${s}s`;
     }
-
-    // Natural Wind Logic
-    let naturalMode = false;
-    let naturalInterval;
 
     function toggleNaturalWind() {
         if(navigator.vibrate) navigator.vibrate(50);
-        const btnNatural = document.getElementById('btn-natural');
-
         if(naturalMode) {
-            // Turn Off Natural Mode
-            naturalMode = false;
-            clearInterval(naturalInterval);
-            btnNatural.classList.remove('active');
-            setFan('V1', 0); 
+            naturalMode = false; clearInterval(naturalInterval);
+            document.getElementById('btn-natural').classList.remove('active'); setFan('V1', 0); 
         } else {
-            // Turn On Natural Mode
-            naturalMode = true;
-            btnNatural.classList.add('active');
-            
-            // Start Uptime if not running
+            naturalMode = true; document.getElementById('btn-natural').classList.add('active');
             if(!turnOnTime) {
-                turnOnTime = Date.now();
-                document.getElementById('uptime-label').style.display = "block";
-                updateUptime();
-                uptimeInterval = setInterval(updateUptime, 1000);
+                turnOnTime = Date.now(); document.getElementById('uptime-label').style.display = "block";
+                updateUptime(); uptimeInterval = setInterval(updateUptime, 1000);
             }
-
-            triggerRandomSpeed();
-            naturalInterval = setInterval(triggerRandomSpeed, 6000); // Change speed every 6 seconds
+            triggerRandomSpeed(); naturalInterval = setInterval(triggerRandomSpeed, 6000);
         }
     }
 
@@ -444,129 +332,108 @@
         if(!naturalMode) return;
         const speeds = [ { pin: 'V2', speed: 1 }, { pin: 'V3', speed: 2 }, { pin: 'V5', speed: 3 } ];
         const rand = speeds[Math.floor(Math.random() * speeds.length)];
-        
         setFan(rand.pin, rand.speed, true);
-        
         document.getElementById('status-label').innerText = `Status: Natural Wind 🍃 (Spd ${rand.speed})`;
         document.getElementById('led-indicator').style.background = "#06b6d4"; 
         document.getElementById('led-indicator').style.boxShadow = "0 0 12px #06b6d4";
         document.getElementById('fan-glow').style.background = "rgba(6, 182, 212, 0.2)";
     }
 
-    // Base Fan Control
-    function setFan(pin, speed, isNaturalEvent = false) {
-        if(!isNaturalEvent && navigator.vibrate) navigator.vibrate(50);
+    function setFan(pin, speed, isAuto = false) {
+        if(!isAuto && navigator.vibrate) navigator.vibrate(50);
+        if(!isAuto && naturalMode) { naturalMode = false; clearInterval(naturalInterval); document.getElementById('btn-natural').classList.remove('active'); }
 
-        // Cancel natural mode if user manually clicks a speed (1,2,3,Off)
-        if(!isNaturalEvent && naturalMode) {
-            naturalMode = false;
-            clearInterval(naturalInterval);
-            document.getElementById('btn-natural').classList.remove('active');
-        }
+        const blades = document.getElementById('fan-blades'), led = document.getElementById('led-indicator');
+        const glow = document.getElementById('fan-glow'), label = document.getElementById('status-label'), uptime = document.getElementById('uptime-label');
 
-        const fanBlades = document.getElementById('fan-blades');
-        const fanGlow = document.getElementById('fan-glow');
-        const led = document.getElementById('led-indicator');
-        const statusLabel = document.getElementById('status-label');
-        const uptimeLabel = document.getElementById('uptime-label');
-
-        fanBlades.className.baseVal = 'blades'; 
-        document.querySelectorAll('.btn-speed:not(#btn-natural)').forEach(btn => btn.classList.remove('active'));
+        blades.className.baseVal = 'blades'; 
+        document.querySelectorAll('.btn-speed:not(#btn-natural)').forEach(b => b.classList.remove('active'));
         document.getElementById(`btn-${speed}`).classList.add('active');
 
         if(speed > 0) {
-            fanBlades.classList.add(`spin-${speed}`);
-            
-            if(!isNaturalEvent) {
-                if(!turnOnTime) {
-                    turnOnTime = Date.now();
-                    uptimeLabel.style.display = "block";
-                    updateUptime();
-                    uptimeInterval = setInterval(updateUptime, 1000);
-                }
-                
-                if(speed === 1) { 
-                    led.style.background = "#10b981"; led.style.boxShadow = "0 0 12px #10b981"; 
-                    fanGlow.style.background = "rgba(16, 185, 129, 0.2)";
-                    statusLabel.innerText = "Status: Speed 1 (Low)"; 
-                }
-                if(speed === 2) { 
-                    led.style.background = "#f59e0b"; led.style.boxShadow = "0 0 12px #f59e0b"; 
-                    fanGlow.style.background = "rgba(245, 158, 11, 0.2)";
-                    statusLabel.innerText = "Status: Speed 2 (Med)"; 
-                }
-                if(speed === 3) { 
-                    led.style.background = "#ef4444"; led.style.boxShadow = "0 0 12px #ef4444"; 
-                    fanGlow.style.background = "rgba(239, 68, 68, 0.2)";
-                    statusLabel.innerText = "Status: Speed 3 (High)"; 
-                }
+            blades.classList.add(`spin-${speed}`);
+            if(!isAuto) {
+                if(!turnOnTime) { turnOnTime = Date.now(); uptime.style.display = "block"; updateUptime(); uptimeInterval = setInterval(updateUptime, 1000); }
+                if(speed === 1) { led.style.background = "var(--success)"; led.style.boxShadow = "0 0 12px var(--success)"; glow.style.background = "rgba(16, 185, 129, 0.2)"; label.innerText = "Status: Speed 1 (Low)"; }
+                if(speed === 2) { led.style.background = "#f59e0b"; led.style.boxShadow = "0 0 12px #f59e0b"; glow.style.background = "rgba(245, 158, 11, 0.2)"; label.innerText = "Status: Speed 2 (Med)"; }
+                if(speed === 3) { led.style.background = "var(--danger)"; led.style.boxShadow = "0 0 12px var(--danger)"; glow.style.background = "rgba(239, 68, 68, 0.2)"; label.innerText = "Status: Speed 3 (High)"; }
             }
         } else {
-            led.style.background = "var(--text-sub)"; 
-            led.style.boxShadow = "none";
-            fanGlow.style.background = "transparent";
-            statusLabel.innerText = "Status: Power OFF";
-            turnOnTime = null;
-            clearInterval(uptimeInterval);
-            uptimeLabel.style.display = "none";
+            led.style.background = "var(--text-sub)"; led.style.boxShadow = "none"; glow.style.background = "transparent"; label.innerText = "Status: Power OFF";
+            turnOnTime = null; clearInterval(uptimeInterval); uptime.style.display = "none";
         }
-
-        const url = `https://${BLYNK_SERVER}/external/api/update?token=${BLYNK_AUTH_TOKEN}&pin=${pin}&value=1`;
-        fetch(url, { mode: 'no-cors' }).catch(err => console.error("Error:", err));
+        fetch(`https://${BLYNK_SERVER}/external/api/update?token=${BLYNK_AUTH_TOKEN}&pin=${pin}&value=1`, { mode: 'no-cors' }).catch(e => console.log(e));
     }
 
-    // Custom Timer Control
-    let timerInterval;
-    function startCustomTimer() {
+    // 3. Compact Timer System (ON & OFF Independent)
+    let currentTab = 'off';
+    let currentMode = 'cd';
+    let timers = { on: { interval: null }, off: { interval: null } };
+
+    function switchTab(tab) {
+        currentTab = tab;
+        document.getElementById('tab-on').classList.toggle('active', tab === 'on');
+        document.getElementById('tab-off').classList.toggle('active', tab === 'off');
+        document.getElementById('btn-submit-on').style.display = tab === 'on' ? 'block' : 'none';
+        document.getElementById('btn-submit-off').style.display = tab === 'off' ? 'block' : 'none';
+    }
+
+    function switchMode(mode) {
+        currentMode = mode;
+        document.getElementById('lbl-cd').classList.toggle('active', mode === 'cd');
+        document.getElementById('lbl-time').classList.toggle('active', mode === 'time');
+        document.getElementById('ui-cd').style.display = mode === 'cd' ? 'flex' : 'none';
+        document.getElementById('ui-time').style.display = mode === 'time' ? 'block' : 'none';
+    }
+
+    function startTimer(type) {
         if(navigator.vibrate) navigator.vibrate(30);
+        cancelTimer(type); // Reset old timer of this type
         
-        const h = parseInt(document.getElementById('t-hours').value) || 0;
-        const m = parseInt(document.getElementById('t-mins').value) || 0;
-        const s = parseInt(document.getElementById('t-secs').value) || 0;
+        let targetMs = 0;
+        const now = new Date();
 
-        const totalMs = (h * 3600000) + (m * 60000) + (s * 1000);
-        
-        if(totalMs <= 0) return alert("Please enter a valid time.");
+        if (currentMode === 'cd') {
+            const h = parseInt(document.getElementById('cd-h').value) || 0;
+            const m = parseInt(document.getElementById('cd-m').value) || 0;
+            const s = parseInt(document.getElementById('cd-s').value) || 0;
+            targetMs = now.getTime() + (h * 3600000) + (m * 60000) + (s * 1000);
+            if(targetMs <= now.getTime()) return alert("Please set a valid duration.");
+        } else {
+            const timeVal = document.getElementById('exact-time').value;
+            if(!timeVal) return alert("Please select a time.");
+            const [th, tm] = timeVal.split(':');
+            let targetDate = new Date(now);
+            targetDate.setHours(th, tm, 0, 0);
+            // If the time has already passed today, set it for tomorrow
+            if (targetDate <= now) targetDate.setDate(targetDate.getDate() + 1);
+            targetMs = targetDate.getTime();
+        }
 
-        cancelTimer(); 
-        const targetTime = new Date().getTime() + totalMs;
-        
-        document.getElementById('btn-start-timer').style.display = "none";
-        document.getElementById('btn-cancel').style.display = "block";
-        
-        timerInterval = setInterval(() => {
-            const now = new Date().getTime();
-            const distance = targetTime - now;
+        document.getElementById(`badge-${type}`).style.display = "flex";
+
+        timers[type].interval = setInterval(() => {
+            const distance = targetMs - new Date().getTime();
             if (distance <= 0) {
-                executeTimerTurnOff();
+                executeTimerAction(type);
             } else {
-                const hr = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const min = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const sec = Math.floor((distance % (1000 * 60)) / 1000);
-                
-                let timeStr = "";
-                if(hr > 0) timeStr += `${hr}h `;
-                if(min > 0 || hr > 0) timeStr += `${min}m `;
-                timeStr += `${sec}s`;
-                
-                document.getElementById('timer-status').innerText = `Turning off in ${timeStr}`;
+                const hr = Math.floor(distance / 3600000);
+                const min = Math.floor((distance % 3600000) / 60000);
+                const sec = Math.floor((distance % 60000) / 1000);
+                document.getElementById(`text-${type}`).innerText = `${hr > 0 ? hr+'h ' : ''}${min}m ${sec}s`;
             }
         }, 1000);
     }
 
-    function executeTimerTurnOff() {
-        cancelTimer();
-        setFan('V1', 0); 
-        document.getElementById('timer-status').innerText = "Fan turned off by timer.";
-        setTimeout(() => { document.getElementById('timer-status').innerText = ""; }, 5000);
+    function executeTimerAction(type) {
+        cancelTimer(type);
+        if(type === 'on') setFan('V2', 1); // เปิดที่ความแรงเบอร์ 1
+        if(type === 'off') setFan('V1', 0); // ปิดพัดลม
     }
 
-    function cancelTimer() {
-        if(navigator.vibrate) navigator.vibrate([30, 50, 30]);
-        clearInterval(timerInterval);
-        document.getElementById('timer-status').innerText = "";
-        document.getElementById('btn-start-timer').style.display = "block";
-        document.getElementById('btn-cancel').style.display = "none";
+    function cancelTimer(type) {
+        clearInterval(timers[type].interval);
+        document.getElementById(`badge-${type}`).style.display = "none";
     }
 </script>
 
