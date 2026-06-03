@@ -321,18 +321,14 @@
         if(!fromFirebase && navigator.vibrate) navigator.vibrate(50);
         
         if(naturalMode) {
-            // กรณีกด "ปิด" โหมดลมธรรมชาติ
+            // กรณีกดปุ่มลมธรรมชาติอีกครั้งเพื่อ "ปิด"
             naturalMode = false; 
             clearInterval(naturalInterval); 
             document.getElementById('btn-natural').classList.remove('active'); 
             
-            // ให้เซ็ตพัดลมเป็นเบอร์ล่าสุดที่ระบบสุ่มค้างไว้ (แทนที่จะเป็น 0)
+            // สั่งปิดพัดลม (เบอร์ 0) ทันที
             if(!fromFirebase) {
-                if (currentNaturalSpeed > 0) {
-                    setFan(currentNaturalPin, currentNaturalSpeed);
-                } else {
-                    setFan('V1', 0); // เผื่อกรณีผิดพลาดให้ปิด
-                }
+                setFan('V1', 0); 
             }
         } else {
             // กรณีกด "เปิด" โหมดลมธรรมชาติ
@@ -343,6 +339,7 @@
             naturalInterval = setInterval(triggerRandomSpeed, 6000);
         }
 
+        // อัปเดตสถานะขึ้น Firebase ว่าโหมดลมธรรมชาติเปิดหรือปิดอยู่
         if(!fromFirebase) {
             fanStateRef.update({ naturalMode: naturalMode });
         }
