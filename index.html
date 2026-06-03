@@ -11,7 +11,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 
     <style>
-        /* CSS เหมือนเดิมทุกประการ ไม่ต้องแก้ไข */
         :root {
             --primary: #6366f1;
             --primary-glow: rgba(99, 102, 241, 0.5);
@@ -62,16 +61,13 @@
         .fan-wrapper { flex: 1; display: flex; justify-content: center; position: relative; }
         .fan-glow { position: absolute; width: 120px; height: 120px; background: transparent; border-radius: 50%; top: 10px; filter: blur(35px); transition: 0.5s; z-index: 0; }
         .stand-fan { height: 180px; z-index: 1; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.15)); }
-        .blades { transform-origin: 50px 50px; transition: fill 0.4s; }
-        /* ----- ลบ .spin-1, .spin-2, .spin-3 ของเดิมออกแล้วใส่โค้ดนี้แทน ----- */
-        .blades { transform-origin: 50px 50px; will-change: transform; }
-        .blade-part { transition: fill 0.8s ease-in-out; }
         
-        .blades[data-speed="1"] .blade-part { fill: var(--success); } 
-        .blades[data-speed="2"] .blade-part { fill: var(--warning); } 
-        .blades[data-speed="3"] .blade-part { fill: var(--danger); } 
-        .blades[data-speed="0"] .blade-part { fill: var(--fan-blade); }
-        /* ----------------------------------------------------------- */
+        /* แก้ไขส่วนของใบพัด ใช้ JS หมุนแทน CSS Animation เพื่อให้มีแรงเฉื่อย */
+        .blades { transform-origin: 50px 50px; transition: fill 0.4s; }
+        .spd-1 .blade-part { fill: var(--success); } 
+        .spd-2 .blade-part { fill: var(--warning); } 
+        .spd-3 .blade-part { fill: var(--danger); } 
+
         .controls-vertical { display: flex; flex-direction: column; gap: 8px; width: 70px; }
         .btn-speed { height: 42px; border: 1px solid var(--card-border); border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; background: var(--btn-bg); color: var(--text-main); transition: 0.2s; }
         .btn-speed:active { transform: scale(0.95); }
@@ -240,12 +236,11 @@
 
 <script>
     // ----------------------------------------------------
-    // ตั้งค่า Firebase และ Blynk ตรงนี้
+    // ตั้งค่า Firebase และ Blynk
     // ----------------------------------------------------
     const BLYNK_AUTH_TOKEN = "XBzHPWNzCK_7bRzeVCQcleCkrb8we3TS"; 
     const BLYNK_SERVER = "blynk.cloud"; 
 
-    // Firebase Config ของคุณ
     const firebaseConfig = {
       apiKey: "AIzaSyDK8eWy4fzbVjE_c8b5hRoG9OBi4H3rOQE",
       authDomain: "bannbestz.firebaseapp.com",
@@ -257,7 +252,6 @@
       measurementId: "G-G3JX9YNX1P"
     };
 
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const fanStateRef = db.ref('javizefan/state');
@@ -280,6 +274,26 @@
 
     // Uptime Core
     let turnOnTime = null, uptimeInterval = null, naturalMode = false, naturalInterval = null;
+
+    // --- ระบบแรงเฉื่อยใบพัดลม (Inertia) ---
+    let currentRotation = 0;
+    let currentVelocity = 0;
+    let targetVelocity = 0;
+
+    function animateFanBlades() {
+        // สูตรคำนวณค่อยๆ ปรับความเร็วปัจจุบันให้เข้าหาเป้าหมาย (สร้างแรงเฉื่อย)
+        currentVelocity += (targetVelocity - currentVelocity) * 0.015; 
+        currentRotation += currentVelocity;
+        
+        const blades = document.getElementById('fan-blades');
+        if (blades) {
+            blades.style.transform = `rotate(${currentRotation}deg)`;
+        }
+        requestAnimationFrame(animateFanBlades);
+    }
+    // เริ่ม loop อนิเมชั่นทันทีที่โหลดเสร็จ
+    requestAnimationFrame(animateFanBlades);
+    // ------------------------------------
 
     function updateUptime() {
         if (!turnOnTime) return;
@@ -317,7 +331,6 @@
             naturalInterval = setInterval(triggerRandomSpeed, 6000);
         }
 
-        // อัปเดตสถานะขึ้น Firebase ถ้าเราเป็นคนกดเอง
         if(!fromFirebase) {
             fanStateRef.update({ naturalMode: naturalMode });
         }
@@ -327,20 +340,31 @@
         if(!naturalMode) return;
         const speeds = [ { pin: 'V2', speed: 1 }, { pin: 'V3', speed: 2 }, { pin: 'V5', speed: 3 } ];
         const rand = speeds[Math.floor(Math.random() * speeds.length)];
-        // เรียก setFan แต่ไม่สั่งให้บันทึก Firebase ซ้ำ
-        setFan(rand.pin, rand.speed, true, false, true); 
         
+        // 1. จัดการ UI
+        document.querySelectorAll('.btn-speed:not(#btn-natural)').forEach(b => b.classList.remove('active'));
+        document.getElementById(`btn-${rand.speed}`).classList.add('active');
+        
+        const blades = document.getElementById('fan-blades');
+        blades.className.baseVal = 'blades'; 
+        blades.classList.add(`spd-${rand.speed}`);
+        
+        if(rand.speed === 1) targetVelocity = 8;
+        if(rand.speed === 2) targetVelocity = 16;
+        if(rand.speed === 3) targetVelocity = 28;
+
         document.getElementById('status-label').innerText = `Natural Wind (Spd ${rand.speed})`;
         document.getElementById('led-indicator').style.background = "#06b6d4"; 
         document.getElementById('led-indicator').style.boxShadow = "0 0 0 4px rgba(6,182,212,0.2)";
         document.getElementById('fan-glow').style.background = "rgba(6, 182, 212, 0.4)";
+
+        // 2. ส่งคำสั่งไป Blynk ทันที! เพื่อให้ลมธรรมชาติทำงานกับฮาร์ดแวร์จริง
+        fetch(`https://${BLYNK_SERVER}/external/api/update?token=${BLYNK_AUTH_TOKEN}&pin=${rand.pin}&value=1`, { mode: 'no-cors' }).catch(e=>console.log(e));
     }
 
-    // เพิ่ม Parameter `fromFirebase` เพื่อป้องกัน loop
     function setFan(pin, speed, isAuto = false, syncOnly = false, fromFirebase = false) {
         if(!isAuto && !syncOnly && navigator.vibrate) navigator.vibrate(50);
         
-        // ถ้าเป็นการตั้งค่าธรรมดา (ไม่ใช่จาก naturalMode วนลูป) ให้ยกเลิก Natural mode
         if(!isAuto && !syncOnly && naturalMode) { 
             naturalMode = false; clearInterval(naturalInterval); 
             document.getElementById('btn-natural').classList.remove('active'); 
@@ -355,7 +379,13 @@
         document.getElementById(`btn-${speed}`).classList.add('active');
 
         if(speed > 0) {
-            blades.classList.add(`spin-${speed}`);
+            blades.classList.add(`spd-${speed}`);
+            
+            // ตั้งเป้าหมายความเร็ว (JS จะค่อยๆ เร่งให้)
+            if(speed === 1) targetVelocity = 8;
+            if(speed === 2) targetVelocity = 16;
+            if(speed === 3) targetVelocity = 28;
+
             if(!isAuto || syncOnly) {
                 initTurnOnVisuals();
                 if(speed === 1) { led.style.background = "var(--success)"; led.style.boxShadow = "0 0 0 4px rgba(16,185,129,0.2)"; glow.style.background = "rgba(16, 185, 129, 0.35)"; label.innerText = "Running: Speed 1"; }
@@ -363,11 +393,11 @@
                 if(speed === 3) { led.style.background = "var(--danger)"; led.style.boxShadow = "0 0 0 4px rgba(244,63,94,0.2)"; glow.style.background = "rgba(244, 63, 94, 0.35)"; label.innerText = "Running: Speed 3"; }
             }
         } else {
+            targetVelocity = 0; // ตั้งเป้าหมายเป็น 0 ใบพัดจะค่อยๆ ชะลอจนหยุดเอง
             led.style.background = "var(--text-sub)"; led.style.boxShadow = "0 0 0 4px rgba(100,116,139,0.1)"; glow.style.background = "transparent"; label.innerText = "System OFF";
             turnOnTime = null; clearInterval(uptimeInterval); document.getElementById('time-metrics').style.display = "none";
         }
         
-        // ถ้ายิงมาจากผู้ใช้ (ไม่ได้มาจาก Firebase อัปเดต) ให้สั่ง Blynk และอัปเดตขึ้น Firebase
         if(!syncOnly && !fromFirebase) {
             fetch(`https://${BLYNK_SERVER}/external/api/update?token=${BLYNK_AUTH_TOKEN}&pin=${pin}&value=1`, { mode: 'no-cors' }).catch(e=>console.log(e));
             
@@ -380,32 +410,27 @@
     }
 
     // ----------------------------------------------------
-    // Firebase Realtime Listeners (รับข้อมูลเมื่อมีคนอื่นกด / เวลารีเฟรช)
+    // Firebase Realtime Listeners
     // ----------------------------------------------------
     window.addEventListener('load', () => {
         document.getElementById('sync-status').style.display = "block";
         
-        // ฟังสถานะพัดลม
         fanStateRef.on('value', (snapshot) => {
             document.getElementById('sync-status').style.display = "none";
             const data = snapshot.val();
             if(data) {
-                // จัดการ Natural Mode
                 if(data.naturalMode !== naturalMode) {
                     toggleNaturalWind(true);
                 }
-                // ถ้าไม่ได้อยู่ใน Natural Mode ให้เซ็ตสปีดพัดลมตาม Database
                 if(!data.naturalMode && data.speed !== undefined) {
-                    if(data.timestamp) turnOnTime = data.timestamp; // ดึงเวลาเริ่มเปิดมาจากฐานข้อมูล
+                    if(data.timestamp) turnOnTime = data.timestamp;
                     setFan(data.pin, data.speed, false, true, true);
                 }
             } else {
-                // ค่าเริ่มต้นถ้าฐานข้อมูลว่างเปล่า
                 setFan('V1', 0, false, true, true);
             }
         });
 
-        // ฟังการตั้งเวลา (Timers)
         fanTimerRef.on('value', (snapshot) => {
             const timersData = snapshot.val();
             ['on', 'off'].forEach(type => {
@@ -419,7 +444,7 @@
     });
 
     // ----------------------------------------------------
-    // UI ควบคุมต่างๆ เหมือนเดิม
+    // UI ควบคุมการตั้งเวลา
     // ----------------------------------------------------
     let currentMode = 'cd';
     let activeIntervals = { on: null, off: null };
@@ -440,7 +465,6 @@
         document.getElementById('ui-time').style.display = mode === 'time' ? 'block' : 'none';
     }
 
-    // เริ่มตั้งเวลา และส่งขึ้น Firebase
     function startTimer(type) {
         if(navigator.vibrate) navigator.vibrate(30);
         let targetMs = 0; const now = new Date();
@@ -461,16 +485,14 @@
         let speed = 0;
         if(type === 'on') { speed = document.querySelector('input[name="on_speed"]:checked').value; }
 
-        // อัปเดตขึ้น Firebase (จะไป trigger startLocalTimerUI ให้ทุกหน้าจอทำงานพร้อมกัน)
         fanTimerRef.child(type).set({
             targetMs: targetMs,
             speed: parseInt(speed)
         });
     }
 
-    // UI นับถอยหลังที่ทำงานในเครื่อง (อ่านค่าจาก Firebase)
     function startLocalTimerUI(type, targetMs, speed = null) {
-        cancelTimer(type, true); // เคลียร์ของเก่าทิ้ง
+        cancelTimer(type, true); 
         
         if(type === 'on' && speed) {
             document.getElementById('on-target-spd').innerText = speed;
@@ -497,53 +519,17 @@
         }
         if(type === 'off') setFan('V1', 0); 
         
-        // ลบ Timer ออกจาก Firebase เมื่อทำงานเสร็จแล้ว
         fanTimerRef.child(type).remove();
     }
 
-    // ยกเลิกเวลา
     function cancelTimer(type, isFromFirebase = false) { 
         clearInterval(activeIntervals[type]); 
         document.getElementById(`badge-${type}`).style.display = "none"; 
         
-        // ถ้าเป็นการกดปุ่มปิดเอง ให้ลบข้อมูลออกจาก Firebase ด้วย
         if(!isFromFirebase) {
             fanTimerRef.child(type).remove();
         }
     }
-    
-    // ----------------------------------------------------
-    // ระบบ Physics Animation สำหรับพัดลม (แรงเฉื่อย)
-    // ----------------------------------------------------
-    let currentRotation = 0;
-    let currentVelocity = 0;
-    let targetVelocity = 0;
-    const acceleration = 0.015; // ปรับค่าน้อยลง=หน่วงนานขึ้น, มากขึ้น=เปลี่ยนสปีดไวขึ้น
-
-    function animateFanPhysics() {
-        // คำนวณความเร็วปัจจุบันให้ค่อยๆ วิ่งไปหาความเร็วเป้าหมาย
-        currentVelocity += (targetVelocity - currentVelocity) * acceleration;
-        
-        // ถ้าเบอร์ 0 และหมุนช้ามากแล้ว ให้หยุดสนิทเพื่อประหยัดทรัพยากรเครื่อง
-        if (targetVelocity === 0 && Math.abs(currentVelocity) < 0.1) {
-            currentVelocity = 0;
-        }
-
-        // หมุนใบพัด
-        if (currentVelocity > 0) {
-            currentRotation = (currentRotation + currentVelocity) % 360;
-            const blades = document.getElementById('fan-blades');
-            if (blades) {
-                blades.style.transform = `rotate(${currentRotation}deg)`;
-            }
-        }
-        
-        // วนลูปแอนิเมชันตลอดเวลา
-        requestAnimationFrame(animateFanPhysics);
-    }
-    
-    // เริ่มต้นระบบแอนิเมชัน
-    requestAnimationFrame(animateFanPhysics);
 </script>
 
 </body>
