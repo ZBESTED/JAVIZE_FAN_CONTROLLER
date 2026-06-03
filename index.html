@@ -84,7 +84,7 @@
             font-size: 18px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -141,13 +141,13 @@
         .controls-vertical {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             width: 70px;
         }
         .btn-speed {
-            height: 45px;
+            height: 42px;
             border: 1px solid var(--card-border);
-            border-radius: 16px;
+            border-radius: 14px;
             font-size: 16px;
             font-family: 'Inter', sans-serif;
             font-weight: 700;
@@ -155,7 +155,7 @@
             background: var(--btn-bg);
             color: var(--btn-text);
             box-shadow: 0 2px 10px rgba(0,0,0,0.02);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -164,14 +164,13 @@
         .btn-speed:hover { background: var(--btn-hover); transform: translateY(-2px); }
         .btn-speed:active { transform: translateY(1px) scale(0.95); }
         
-        .btn-speed.active {
-            color: white;
-            box-shadow: 0 8px 20px var(--primary-glow);
-        }
+        .btn-speed.active { color: white; box-shadow: 0 8px 20px var(--primary-glow); }
         
         #btn-3.active { background: #ef4444; border-color: #ef4444; box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4); }
         #btn-2.active { background: #f59e0b; border-color: #f59e0b; box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4); }
         #btn-1.active { background: #10b981; border-color: #10b981; box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4); }
+        #btn-natural { font-size: 14px; }
+        #btn-natural.active { background: #06b6d4; border-color: #06b6d4; box-shadow: 0 8px 20px rgba(6, 182, 212, 0.4); color: white; }
         .btn-off.active { background: #ef4444; border-color: #ef4444; color: white; box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
 
         .status-container {
@@ -201,13 +200,7 @@
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
             transition: all 0.4s ease;
         }
-        .uptime-label {
-            font-size: 12px;
-            color: var(--text-sub);
-            font-weight: 500;
-            display: none;
-            transition: opacity 0.3s ease;
-        }
+        .uptime-label { font-size: 12px; color: var(--text-sub); font-weight: 500; display: none; }
 
         .timer-section {
             background: var(--btn-bg);
@@ -225,42 +218,45 @@
             gap: 8px;
         }
         
-        /* Slider Styling */
-        .slider-container { margin-bottom: 20px; }
-        input[type="range"] {
-            -webkit-appearance: none;
-            width: 100%;
-            height: 6px;
-            background: rgba(0,0,0,0.1);
-            border-radius: 5px;
-            outline: none;
-            margin-bottom: 10px;
+        /* Time Picker Inputs */
+        .time-picker {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-        [data-theme="dark"] input[type="range"] { background: rgba(255,255,255,0.1); }
-        
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 22px;
-            height: 22px;
-            border-radius: 50%;
-            background: var(--primary);
-            cursor: pointer;
-            box-shadow: 0 0 10px var(--primary-glow);
-            transition: transform 0.1s;
+        .time-col {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
         }
-        input[type="range"]::-webkit-slider-thumb:active { transform: scale(1.2); }
-        
-        .slider-value-display {
+        .time-col label { font-size: 12px; color: var(--text-sub); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+        .time-col input {
+            width: 65px;
+            height: 55px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
             text-align: center;
-            font-size: 16px;
+            font-size: 22px;
             font-weight: 600;
-            color: var(--primary);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: 0.3s;
         }
+        .time-col input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .time-separator { font-size: 24px; font-weight: 600; color: var(--text-sub); margin-top: 15px; }
+        
+        /* Hide arrows on number inputs */
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
 
         .btn-timer {
             width: 100%;
-            padding: 12px;
+            padding: 14px;
             background: var(--primary);
             color: white;
             border: none;
@@ -284,23 +280,13 @@
         }
         .btn-cancel:hover { background: rgba(239, 68, 68, 0.2); box-shadow: none; }
         
-        .status-text {
-            text-align: center;
-            font-size: 13px;
-            color: var(--primary);
-            min-height: 20px;
-            margin-top: 15px;
-            font-weight: 500;
-            letter-spacing: 0.3px;
-        }
+        .status-text { text-align: center; font-size: 13px; color: var(--primary); min-height: 20px; margin-top: 15px; font-weight: 500; }
     </style>
 </head>
 <body>
 
 <div class="app-container">
-    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()">
-        <i class="fa-solid fa-moon"></i>
-    </button>
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
 
     <div class="header">
         <h1>JavizeFAN</h1>
@@ -330,12 +316,11 @@
                 <circle cx="50" cy="50" r="16" fill="none" stroke="var(--fan-stand)" stroke-width="1" opacity="0.5"/>
                 <line x1="50" y1="6" x2="50" y2="94" stroke="var(--fan-stand)" stroke-width="1" opacity="0.5"/>
                 <line x1="6" y1="50" x2="94" y2="50" stroke="var(--fan-stand)" stroke-width="1" opacity="0.5"/>
-                <line x1="19" y1="19" x2="81" y2="81" stroke="var(--fan-stand)" stroke-width="1" opacity="0.5"/>
-                <line x1="19" y1="81" x2="81" y2="19" stroke="var(--fan-stand)" stroke-width="1" opacity="0.5"/>
             </svg>
         </div>
 
         <div class="controls-vertical">
+            <button class="btn-speed" id="btn-natural" onclick="toggleNaturalWind()"><i class="fa-solid fa-leaf"></i></button>
             <button class="btn-speed" id="btn-3" onclick="setFan('V5', 3)">3</button>
             <button class="btn-speed" id="btn-2" onclick="setFan('V3', 2)">2</button>
             <button class="btn-speed" id="btn-1" onclick="setFan('V2', 1)">1</button>
@@ -354,16 +339,25 @@
     <div class="timer-section">
         <div class="timer-title"><i class="fa-solid fa-stopwatch"></i> Auto-Off Timer</div>
         
-        <div class="slider-container">
-            <input type="range" id="timer-slider" min="5" max="120" step="5" value="30" oninput="updateSliderLabel(this.value)">
-            <div class="slider-value-display" id="slider-display">30 Minutes</div>
+        <div class="time-picker">
+            <div class="time-col">
+                <label>Hrs</label>
+                <input type="number" id="t-hours" min="0" max="23" value="0" onfocus="this.select()">
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-col">
+                <label>Mins</label>
+                <input type="number" id="t-mins" min="0" max="59" value="30" onfocus="this.select()">
+            </div>
+            <div class="time-separator">:</div>
+            <div class="time-col">
+                <label>Secs</label>
+                <input type="number" id="t-secs" min="0" max="59" value="0" onfocus="this.select()">
+            </div>
         </div>
 
-        <button class="btn-timer" onclick="startSliderTimer()" id="btn-start-timer">Start Timer</button>
-        
-        <button class="btn-timer btn-cancel" onclick="cancelTimer()" style="display: none;" id="btn-cancel">
-            <i class="fa-solid fa-xmark"></i> Cancel Timer
-        </button>
+        <button class="btn-timer" onclick="startCustomTimer()" id="btn-start-timer">Start Timer</button>
+        <button class="btn-timer btn-cancel" onclick="cancelTimer()" style="display: none;" id="btn-cancel"><i class="fa-solid fa-xmark"></i> Cancel Timer</button>
 
         <div class="status-text" id="timer-status"></div>
     </div>
@@ -411,14 +405,64 @@
         let displayStr = "Active for: ";
         if (h > 0) displayStr += `${h}h `;
         displayStr += `${m}m ${s}s`;
-        
         document.getElementById('uptime-label').innerText = displayStr;
     }
 
-    // Fan Control
-    let timerInterval;
-    function setFan(pin, speed) {
+    // Natural Wind Logic
+    let naturalMode = false;
+    let naturalInterval;
+
+    function toggleNaturalWind() {
         if(navigator.vibrate) navigator.vibrate(50);
+        const btnNatural = document.getElementById('btn-natural');
+
+        if(naturalMode) {
+            // Turn Off Natural Mode
+            naturalMode = false;
+            clearInterval(naturalInterval);
+            btnNatural.classList.remove('active');
+            setFan('V1', 0); 
+        } else {
+            // Turn On Natural Mode
+            naturalMode = true;
+            btnNatural.classList.add('active');
+            
+            // Start Uptime if not running
+            if(!turnOnTime) {
+                turnOnTime = Date.now();
+                document.getElementById('uptime-label').style.display = "block";
+                updateUptime();
+                uptimeInterval = setInterval(updateUptime, 1000);
+            }
+
+            triggerRandomSpeed();
+            naturalInterval = setInterval(triggerRandomSpeed, 6000); // Change speed every 6 seconds
+        }
+    }
+
+    function triggerRandomSpeed() {
+        if(!naturalMode) return;
+        const speeds = [ { pin: 'V2', speed: 1 }, { pin: 'V3', speed: 2 }, { pin: 'V5', speed: 3 } ];
+        const rand = speeds[Math.floor(Math.random() * speeds.length)];
+        
+        setFan(rand.pin, rand.speed, true);
+        
+        document.getElementById('status-label').innerText = `Status: Natural Wind 🍃 (Spd ${rand.speed})`;
+        document.getElementById('led-indicator').style.background = "#06b6d4"; 
+        document.getElementById('led-indicator').style.boxShadow = "0 0 12px #06b6d4";
+        document.getElementById('fan-glow').style.background = "rgba(6, 182, 212, 0.2)";
+    }
+
+    // Base Fan Control
+    function setFan(pin, speed, isNaturalEvent = false) {
+        if(!isNaturalEvent && navigator.vibrate) navigator.vibrate(50);
+
+        // Cancel natural mode if user manually clicks a speed (1,2,3,Off)
+        if(!isNaturalEvent && naturalMode) {
+            naturalMode = false;
+            clearInterval(naturalInterval);
+            document.getElementById('btn-natural').classList.remove('active');
+        }
 
         const fanBlades = document.getElementById('fan-blades');
         const fanGlow = document.getElementById('fan-glow');
@@ -427,42 +471,41 @@
         const uptimeLabel = document.getElementById('uptime-label');
 
         fanBlades.className.baseVal = 'blades'; 
-        document.querySelectorAll('.btn-speed').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.btn-speed:not(#btn-natural)').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`btn-${speed}`).classList.add('active');
 
         if(speed > 0) {
             fanBlades.classList.add(`spin-${speed}`);
             
-            // Start Uptime
-            if(!turnOnTime) {
-                turnOnTime = Date.now();
-                uptimeLabel.style.display = "block";
-                updateUptime();
-                uptimeInterval = setInterval(updateUptime, 1000);
-            }
-
-            if(speed === 1) { 
-                led.style.background = "#10b981"; led.style.boxShadow = "0 0 12px #10b981"; 
-                fanGlow.style.background = "rgba(16, 185, 129, 0.2)";
-                statusLabel.innerText = "Status: Speed 1 (Low)"; 
-            }
-            if(speed === 2) { 
-                led.style.background = "#f59e0b"; led.style.boxShadow = "0 0 12px #f59e0b"; 
-                fanGlow.style.background = "rgba(245, 158, 11, 0.2)";
-                statusLabel.innerText = "Status: Speed 2 (Med)"; 
-            }
-            if(speed === 3) { 
-                led.style.background = "#ef4444"; led.style.boxShadow = "0 0 12px #ef4444"; 
-                fanGlow.style.background = "rgba(239, 68, 68, 0.2)";
-                statusLabel.innerText = "Status: Speed 3 (High)"; 
+            if(!isNaturalEvent) {
+                if(!turnOnTime) {
+                    turnOnTime = Date.now();
+                    uptimeLabel.style.display = "block";
+                    updateUptime();
+                    uptimeInterval = setInterval(updateUptime, 1000);
+                }
+                
+                if(speed === 1) { 
+                    led.style.background = "#10b981"; led.style.boxShadow = "0 0 12px #10b981"; 
+                    fanGlow.style.background = "rgba(16, 185, 129, 0.2)";
+                    statusLabel.innerText = "Status: Speed 1 (Low)"; 
+                }
+                if(speed === 2) { 
+                    led.style.background = "#f59e0b"; led.style.boxShadow = "0 0 12px #f59e0b"; 
+                    fanGlow.style.background = "rgba(245, 158, 11, 0.2)";
+                    statusLabel.innerText = "Status: Speed 2 (Med)"; 
+                }
+                if(speed === 3) { 
+                    led.style.background = "#ef4444"; led.style.boxShadow = "0 0 12px #ef4444"; 
+                    fanGlow.style.background = "rgba(239, 68, 68, 0.2)";
+                    statusLabel.innerText = "Status: Speed 3 (High)"; 
+                }
             }
         } else {
             led.style.background = "var(--text-sub)"; 
             led.style.boxShadow = "none";
             fanGlow.style.background = "transparent";
             statusLabel.innerText = "Status: Power OFF";
-            
-            // Stop Uptime
             turnOnTime = null;
             clearInterval(uptimeInterval);
             uptimeLabel.style.display = "none";
@@ -472,22 +515,21 @@
         fetch(url, { mode: 'no-cors' }).catch(err => console.error("Error:", err));
     }
 
-    // Timer Functions
-    function updateSliderLabel(val) {
-        const h = Math.floor(val / 60);
-        const m = val % 60;
-        let text = "";
-        if (h > 0) text += `${h} Hour${h > 1 ? 's' : ''} `;
-        if (m > 0 || h === 0) text += `${m} Minute${m !== 1 ? 's' : ''}`;
-        document.getElementById('slider-display').innerText = text;
-    }
-
-    function startSliderTimer() {
-        const mins = parseInt(document.getElementById('timer-slider').value);
+    // Custom Timer Control
+    let timerInterval;
+    function startCustomTimer() {
         if(navigator.vibrate) navigator.vibrate(30);
         
+        const h = parseInt(document.getElementById('t-hours').value) || 0;
+        const m = parseInt(document.getElementById('t-mins').value) || 0;
+        const s = parseInt(document.getElementById('t-secs').value) || 0;
+
+        const totalMs = (h * 3600000) + (m * 60000) + (s * 1000);
+        
+        if(totalMs <= 0) return alert("Please enter a valid time.");
+
         cancelTimer(); 
-        const targetTime = new Date().getTime() + (mins * 60000);
+        const targetTime = new Date().getTime() + totalMs;
         
         document.getElementById('btn-start-timer').style.display = "none";
         document.getElementById('btn-cancel').style.display = "block";
@@ -498,13 +540,14 @@
             if (distance <= 0) {
                 executeTimerTurnOff();
             } else {
-                const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((distance % (1000 * 60)) / 1000);
+                const hr = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const min = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const sec = Math.floor((distance % (1000 * 60)) / 1000);
                 
                 let timeStr = "";
-                if(h > 0) timeStr += `${h}h `;
-                timeStr += `${m}m ${s}s`;
+                if(hr > 0) timeStr += `${hr}h `;
+                if(min > 0 || hr > 0) timeStr += `${min}m `;
+                timeStr += `${sec}s`;
                 
                 document.getElementById('timer-status').innerText = `Turning off in ${timeStr}`;
             }
