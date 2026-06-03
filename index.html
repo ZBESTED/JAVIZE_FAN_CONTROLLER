@@ -63,13 +63,15 @@
         .fan-glow { position: absolute; width: 120px; height: 120px; background: transparent; border-radius: 50%; top: 10px; filter: blur(35px); transition: 0.5s; z-index: 0; }
         .stand-fan { height: 180px; z-index: 1; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.15)); }
         .blades { transform-origin: 50px 50px; transition: fill 0.4s; }
-        .spin-1 { animation: spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
-        .spin-1 .blade-part { fill: var(--success); } 
-        .spin-2 { animation: spin 0.6s linear infinite; }
-        .spin-2 .blade-part { fill: var(--warning); } 
-        .spin-3 { animation: spin 0.15s linear infinite; }
-        .spin-3 .blade-part { fill: var(--danger); } 
-        @keyframes spin { 100% { transform: rotate(360deg); } }
+        /* ----- ลบ .spin-1, .spin-2, .spin-3 ของเดิมออกแล้วใส่โค้ดนี้แทน ----- */
+        .blades { transform-origin: 50px 50px; will-change: transform; }
+        .blade-part { transition: fill 0.8s ease-in-out; }
+        
+        .blades[data-speed="1"] .blade-part { fill: var(--success); } 
+        .blades[data-speed="2"] .blade-part { fill: var(--warning); } 
+        .blades[data-speed="3"] .blade-part { fill: var(--danger); } 
+        .blades[data-speed="0"] .blade-part { fill: var(--fan-blade); }
+        /* ----------------------------------------------------------- */
         .controls-vertical { display: flex; flex-direction: column; gap: 8px; width: 70px; }
         .btn-speed { height: 42px; border: 1px solid var(--card-border); border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; background: var(--btn-bg); color: var(--text-main); transition: 0.2s; }
         .btn-speed:active { transform: scale(0.95); }
@@ -509,6 +511,39 @@
             fanTimerRef.child(type).remove();
         }
     }
+    
+    // ----------------------------------------------------
+    // ระบบ Physics Animation สำหรับพัดลม (แรงเฉื่อย)
+    // ----------------------------------------------------
+    let currentRotation = 0;
+    let currentVelocity = 0;
+    let targetVelocity = 0;
+    const acceleration = 0.015; // ปรับค่าน้อยลง=หน่วงนานขึ้น, มากขึ้น=เปลี่ยนสปีดไวขึ้น
+
+    function animateFanPhysics() {
+        // คำนวณความเร็วปัจจุบันให้ค่อยๆ วิ่งไปหาความเร็วเป้าหมาย
+        currentVelocity += (targetVelocity - currentVelocity) * acceleration;
+        
+        // ถ้าเบอร์ 0 และหมุนช้ามากแล้ว ให้หยุดสนิทเพื่อประหยัดทรัพยากรเครื่อง
+        if (targetVelocity === 0 && Math.abs(currentVelocity) < 0.1) {
+            currentVelocity = 0;
+        }
+
+        // หมุนใบพัด
+        if (currentVelocity > 0) {
+            currentRotation = (currentRotation + currentVelocity) % 360;
+            const blades = document.getElementById('fan-blades');
+            if (blades) {
+                blades.style.transform = `rotate(${currentRotation}deg)`;
+            }
+        }
+        
+        // วนลูปแอนิเมชันตลอดเวลา
+        requestAnimationFrame(animateFanPhysics);
+    }
+    
+    // เริ่มต้นระบบแอนิเมชัน
+    requestAnimationFrame(animateFanPhysics);
 </script>
 
 </body>
