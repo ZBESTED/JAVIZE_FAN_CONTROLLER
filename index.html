@@ -5,105 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>JavizeFAN Smart Controller</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         :root {
             --primary: #6366f1;
             --primary-glow: rgba(99, 102, 241, 0.5);
-            --bg-base: #f1f5f9;
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --card-border: rgba(255, 255, 255, 0.5);
-            --text-main: #1e293b;
+            --bg-base: #f4f7f9;
+            --card-bg: rgba(255, 255, 255, 0.75);
+            --card-border: rgba(255, 255, 255, 0.6);
+            --text-main: #0f172a;
             --text-sub: #64748b;
-            --btn-bg: rgba(255, 255, 255, 0.8);
+            --btn-bg: rgba(255, 255, 255, 0.9);
             --btn-text: #475569;
             --fan-stand: #475569;
             --fan-blade: #94a3b8;
             --fan-center: #1e293b;
-            --glass-shadow: 0 15px 35px rgba(0, 0, 0, 0.05);
+            --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
             --success: #10b981;
-            --danger: #ef4444;
+            --danger: #f43f5e;
             --warning: #f59e0b;
         }
 
         [data-theme="dark"] {
             --primary: #818cf8;
             --primary-glow: rgba(129, 140, 248, 0.4);
-            --bg-base: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.65);
-            --card-border: rgba(255, 255, 255, 0.1);
+            --bg-base: #0b1120;
+            --card-bg: rgba(30, 41, 59, 0.5);
+            --card-border: rgba(255, 255, 255, 0.08);
             --text-main: #f8fafc;
             --text-sub: #94a3b8;
-            --btn-bg: rgba(51, 65, 85, 0.6);
+            --btn-bg: rgba(51, 65, 85, 0.7);
             --btn-text: #e2e8f0;
             --fan-stand: #cbd5e0;
             --fan-blade: #64748b;
             --fan-center: #f8fafc;
-            --glass-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+            --glass-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-base);
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            color: var(--text-main);
-            transition: all 0.5s ease;
-            box-sizing: border-box;
-            overflow-x: hidden;
+            font-family: 'Inter', sans-serif; background-color: var(--bg-base);
+            margin: 0; padding: 20px 15px; display: flex; justify-content: center;
+            align-items: flex-start; min-height: 100vh; color: var(--text-main);
+            transition: background-color 0.5s ease; box-sizing: border-box; overflow-x: hidden;
         }
 
-        /* Animated Background Blobs for Premium Feel */
-        .bg-blob {
-            position: fixed; filter: blur(70px); opacity: 0.6; z-index: -1; border-radius: 50%;
-            animation: float 10s infinite alternate ease-in-out;
+        /* Ambient Background */
+        .ambient-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; overflow: hidden;
         }
-        .blob-1 { background: #6366f1; width: 300px; height: 300px; top: -50px; left: -100px; }
-        .blob-2 { background: #ec4899; width: 250px; height: 250px; bottom: 10%; right: -50px; animation-delay: -5s; }
-        .blob-3 { background: #10b981; width: 200px; height: 200px; top: 40%; left: 20%; opacity: 0.3; animation-duration: 15s; }
-        @keyframes float { 0% { transform: translateY(0) scale(1); } 100% { transform: translateY(30px) scale(1.1); } }
-        [data-theme="light"] .bg-blob { opacity: 0.3; }
+        .blob {
+            position: absolute; border-radius: 50%; filter: blur(80px); opacity: 0.5;
+            animation: float 12s infinite alternate ease-in-out;
+        }
+        .blob-1 { background: var(--primary); width: 350px; height: 350px; top: -100px; left: -100px; }
+        .blob-2 { background: #06b6d4; width: 250px; height: 250px; bottom: 50px; right: -50px; animation-delay: -4s; }
+        @keyframes float { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(30px, 50px) scale(1.1); } }
 
         .app-container {
-            width: 100%; max-width: 420px; background: var(--card-bg);
-            border: 1px solid var(--card-border); border-radius: 40px;
-            box-shadow: var(--glass-shadow); padding: 35px 25px;
-            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-            position: relative; z-index: 1;
+            width: 100%; max-width: 400px; background: var(--card-bg);
+            border: 1px solid var(--card-border); border-radius: 35px;
+            box-shadow: var(--glass-shadow); padding: 30px 25px;
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); position: relative;
         }
 
+        .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
+        .title-area h1 { font-size: 26px; margin: 0; font-weight: 800; letter-spacing: -0.5px; background: linear-gradient(135deg, var(--primary), #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .title-area p { font-size: 13px; color: var(--text-sub); margin: 4px 0 0 0; font-weight: 500; }
         .theme-toggle {
-            position: absolute; top: 30px; right: 25px;
-            background: var(--btn-bg); border: 1px solid var(--card-border);
-            color: var(--text-main); width: 45px; height: 45px;
-            border-radius: 50%; font-size: 18px; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); transition: 0.3s;
+            background: var(--btn-bg); border: 1px solid var(--card-border); color: var(--text-main);
+            width: 42px; height: 42px; border-radius: 50%; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; transition: 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
         .theme-toggle:active { transform: scale(0.9); }
 
-        .header { margin-bottom: 25px; }
-        .header h1 { font-size: 28px; margin: 0; color: var(--primary); font-weight: 800; letter-spacing: -0.5px; }
-        .header p { font-size: 14px; color: var(--text-sub); margin: 5px 0 0 0; font-weight: 500; }
-
-        /* แผงควบคุมหลัก */
-        .main-dashboard {
+        /* Dashboard Section */
+        .device-showcase {
+            background: rgba(0,0,0,0.02); border-radius: 25px; padding: 20px;
+            border: 1px solid var(--card-border); margin-bottom: 20px;
             display: flex; align-items: center; justify-content: space-between;
-            margin-bottom: 20px; background: rgba(0, 0, 0, 0.03);
-            border-radius: 30px; padding: 25px; border: 1px solid var(--card-border);
         }
-        [data-theme="dark"] .main-dashboard { background: rgba(0, 0, 0, 0.2); }
+        [data-theme="dark"] .device-showcase { background: rgba(0,0,0,0.2); }
 
         .fan-wrapper { flex: 1; display: flex; justify-content: center; position: relative; }
-        .fan-glow {
-            position: absolute; width: 110px; height: 110px; background: transparent;
-            border-radius: 50%; top: 15px; filter: blur(30px); transition: 0.5s; z-index: 0;
-        }
-        .stand-fan { height: 170px; z-index: 1; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.15)); }
+        .fan-glow { position: absolute; width: 120px; height: 120px; background: transparent; border-radius: 50%; top: 10px; filter: blur(35px); transition: 0.5s; z-index: 0; }
+        .stand-fan { height: 180px; z-index: 1; filter: drop-shadow(0 15px 15px rgba(0,0,0,0.15)); }
         .blades { transform-origin: 50px 50px; transition: fill 0.4s; }
         .spin-1 { animation: spin 1.2s cubic-bezier(0.4, 0, 0.2, 1) infinite; }
         .spin-1 .blade-part { fill: var(--success); } 
@@ -113,107 +99,112 @@
         .spin-3 .blade-part { fill: var(--danger); } 
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        .controls-vertical { display: flex; flex-direction: column; gap: 10px; width: 75px; }
+        .controls-vertical { display: flex; flex-direction: column; gap: 8px; width: 70px; }
         .btn-speed {
-            height: 44px; border: 1px solid var(--card-border); border-radius: 14px;
-            font-size: 16px; font-weight: 700; cursor: pointer; background: var(--btn-bg);
-            color: var(--text-main); transition: 0.3s; backdrop-filter: blur(10px);
+            height: 42px; border: 1px solid var(--card-border); border-radius: 12px; font-size: 16px; font-weight: 700;
+            cursor: pointer; background: var(--btn-bg); color: var(--text-main); transition: 0.2s;
         }
         .btn-speed:active { transform: scale(0.95); }
         .btn-speed.active { color: white; border-color: transparent; }
-        #btn-3.active { background: var(--danger); box-shadow: 0 8px 20px rgba(239,68,68,0.4); }
-        #btn-2.active { background: var(--warning); box-shadow: 0 8px 20px rgba(245,158,11,0.4); }
-        #btn-1.active { background: var(--success); box-shadow: 0 8px 20px rgba(16,185,129,0.4); }
-        #btn-natural { font-size: 15px; color: #06b6d4; }
-        #btn-natural.active { background: #06b6d4; box-shadow: 0 8px 20px rgba(6,182,212,0.4); color: white; }
-        .btn-off.active { background: var(--danger); color: white; }
+        #btn-3.active { background: var(--danger); box-shadow: 0 6px 15px rgba(244,63,94,0.4); }
+        #btn-2.active { background: var(--warning); box-shadow: 0 6px 15px rgba(245,158,11,0.4); }
+        #btn-1.active { background: var(--success); box-shadow: 0 6px 15px rgba(16,185,129,0.4); }
+        #btn-natural { color: #06b6d4; font-size: 15px; }
+        #btn-natural.active { background: #06b6d4; box-shadow: 0 6px 15px rgba(6,182,212,0.4); color: white; }
+        .btn-off.active { background: var(--text-sub); color: white; box-shadow: none; }
 
-        /* แถบสถานะแบบใหม่ */
-        .status-card {
-            background: var(--btn-bg); border-radius: 20px; padding: 15px;
-            border: 1px solid var(--card-border); margin-bottom: 20px;
-            display: flex; flex-direction: column; align-items: center; gap: 8px;
+        /* Status & Time Panel */
+        .info-panel {
+            background: var(--btn-bg); border-radius: 20px; padding: 18px; margin-bottom: 25px;
+            border: 1px solid var(--card-border); box-shadow: 0 4px 15px rgba(0,0,0,0.02);
         }
-        .status-header { display: flex; align-items: center; gap: 10px; font-size: 15px; font-weight: 700; }
-        .led-dot { width: 12px; height: 12px; border-radius: 50%; background: var(--text-sub); transition: 0.4s; }
-        .time-info {
-            display: flex; gap: 15px; font-size: 12px; color: var(--text-sub); font-weight: 500;
-            background: rgba(0,0,0,0.03); padding: 8px 15px; border-radius: 10px; display: none;
-        }
-        [data-theme="dark"] .time-info { background: rgba(0,0,0,0.2); }
-        .time-info div { display: flex; align-items: center; gap: 5px; }
-        .sync-status { font-size: 11px; color: var(--primary); font-style: italic; display: none; }
+        .status-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; }
+        .status-badge { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 15px; }
+        .led-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--text-sub); transition: 0.4s; box-shadow: 0 0 0 3px rgba(100,116,139,0.1); }
+        .sync-text { font-size: 11px; color: var(--primary); font-weight: 600; display: none; }
 
-        /* ระบบตั้งเวลา */
-        .timer-module {
+        .time-metrics { display: none; background: rgba(0,0,0,0.03); border-radius: 12px; padding: 12px; gap: 10px; flex-direction: column; }
+        [data-theme="dark"] .time-metrics { background: rgba(0,0,0,0.2); }
+        .metric-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: var(--text-sub); }
+        .metric-item span { color: var(--text-main); font-variant-numeric: tabular-nums; }
+
+        /* Timer Module */
+        .timer-section {
             background: var(--btn-bg); border-radius: 25px; border: 1px solid var(--card-border);
-            overflow: hidden; display: flex; flex-direction: column;
+            overflow: hidden; margin-bottom: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);
         }
-        .timer-tabs { display: flex; border-bottom: 1px solid var(--card-border); background: rgba(0,0,0,0.02); }
+        .timer-tabs { display: flex; border-bottom: 1px solid var(--card-border); }
         .timer-tabs button {
             flex: 1; padding: 15px; background: transparent; border: none; color: var(--text-sub);
-            font-weight: 600; cursor: pointer; transition: 0.3s; font-size: 14px;
+            font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.3s;
         }
         .timer-tabs button.active { background: var(--card-bg); color: var(--text-main); }
         .timer-tabs button#tab-off.active { border-bottom: 3px solid var(--danger); }
         .timer-tabs button#tab-on.active { border-bottom: 3px solid var(--success); }
 
         .timer-body { padding: 20px; }
-        
-        .mode-toggles { display: flex; background: var(--card-bg); border-radius: 12px; padding: 4px; margin-bottom: 15px; border: 1px solid var(--card-border); }
-        .mode-toggles label { flex: 1; text-align: center; padding: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 8px; transition: 0.3s; color: var(--text-sub); }
+
+        /* Speed Config for ON Timer */
+        .on-speed-config { margin-bottom: 20px; display: none; }
+        .on-speed-config label.title { display: block; font-size: 12px; font-weight: 700; color: var(--text-sub); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .speed-selector { display: flex; gap: 8px; }
+        .speed-selector label {
+            flex: 1; text-align: center; padding: 10px 0; border-radius: 10px; background: var(--card-bg);
+            border: 1px solid var(--card-border); font-weight: 700; font-size: 14px; cursor: pointer; transition: 0.2s; color: var(--text-sub);
+        }
+        .speed-selector input { display: none; }
+        .speed-selector input:checked + label[for="sp1"] { background: var(--success); color: white; border-color: var(--success); }
+        .speed-selector input:checked + label[for="sp2"] { background: var(--warning); color: white; border-color: var(--warning); }
+        .speed-selector input:checked + label[for="sp3"] { background: var(--danger); color: white; border-color: var(--danger); }
+
+        /* Mode & Inputs */
+        .mode-toggles { display: flex; background: var(--card-bg); border-radius: 10px; padding: 4px; margin-bottom: 15px; border: 1px solid var(--card-border); }
+        .mode-toggles label { flex: 1; text-align: center; padding: 8px; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: 6px; transition: 0.3s; color: var(--text-sub); }
         .mode-toggles input { display: none; }
-        .mode-toggles label.active { background: var(--btn-bg); color: var(--primary); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .mode-toggles label.active { background: var(--btn-bg); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
 
-        /* เลือกความแรงพัดลมตอนเปิด */
-        .on-speed-config { margin-bottom: 15px; display: none; }
-        .on-speed-config p { margin: 0 0 8px 0; font-size: 12px; font-weight: 600; color: var(--text-sub); text-align: center; text-transform: uppercase; letter-spacing: 1px; }
-        .segmented-control { display: flex; background: var(--card-bg); border-radius: 12px; padding: 4px; border: 1px solid var(--card-border); }
-        .segmented-control label { flex: 1; text-align: center; padding: 10px; cursor: pointer; border-radius: 8px; font-weight: 700; font-size: 14px; color: var(--text-sub); transition: 0.3s; }
-        .segmented-control input { display: none; }
-        .segmented-control input:checked + label[for="sp1"] { background: var(--success); color: white; box-shadow: 0 4px 10px rgba(16,185,129,0.3); }
-        .segmented-control input:checked + label[for="sp2"] { background: var(--warning); color: white; box-shadow: 0 4px 10px rgba(245,158,11,0.3); }
-        .segmented-control input:checked + label[for="sp3"] { background: var(--danger); color: white; box-shadow: 0 4px 10px rgba(239,68,68,0.3); }
-
-        /* Time Inputs */
-        .compact-time-picker { display: flex; justify-content: center; gap: 8px; margin-bottom: 15px; }
-        .input-group { display: flex; align-items: center; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--card-border); padding: 5px 10px; }
-        .input-group input { width: 35px; background: transparent; border: none; text-align: center; font-size: 18px; font-weight: 700; color: var(--text-main); outline: none; -moz-appearance: textfield; }
+        .compact-time-picker { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .input-group { display: flex; align-items: baseline; background: var(--card-bg); border-radius: 12px; border: 1px solid var(--card-border); padding: 8px 12px; }
+        .input-group input { width: 40px; background: transparent; border: none; text-align: center; font-size: 22px; font-weight: 800; color: var(--text-main); outline: none; -moz-appearance: textfield; }
         .input-group input::-webkit-outer-spin-button, .input-group input::-webkit-inner-spin-button { -webkit-appearance: none; }
-        .input-group span { font-size: 13px; color: var(--text-sub); font-weight: 500; }
+        .input-group span { font-size: 14px; color: var(--text-sub); font-weight: 600; margin-left: 2px; }
 
-        .exact-time-picker { text-align: center; margin-bottom: 15px; display: none; }
-        .exact-time-picker input { padding: 12px 20px; border-radius: 14px; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); font-size: 20px; font-weight: 700; outline: none; font-family: 'Inter', sans-serif; }
+        .exact-time-picker { text-align: center; margin-bottom: 20px; display: none; }
+        .exact-time-picker input { padding: 12px 20px; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--card-border); color: var(--text-main); font-size: 22px; font-weight: 800; outline: none; font-family: 'Inter', sans-serif; width: 150px; text-align: center; }
 
-        .btn-set-timer { width: 100%; padding: 14px; border: none; border-radius: 14px; font-weight: 700; font-size: 15px; color: white; cursor: pointer; transition: 0.3s; }
-        .btn-set-off { background: var(--danger); box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3); }
+        .btn-set-timer { width: 100%; padding: 15px; border: none; border-radius: 14px; font-weight: 800; font-size: 15px; color: white; cursor: pointer; transition: 0.3s; }
+        .btn-set-off { background: var(--danger); box-shadow: 0 4px 15px rgba(244, 63, 94, 0.3); }
         .btn-set-on { background: var(--success); box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); display: none; }
         .btn-set-timer:active { transform: scale(0.95); }
 
         /* Active Timers Badge */
-        .active-timers { margin-top: 15px; display: flex; flex-direction: column; gap: 8px; }
-        .timer-badge { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-radius: 14px; font-size: 13px; font-weight: 600; display: none; backdrop-filter: blur(10px); }
-        .timer-badge.off { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
-        .timer-badge.on { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
-        .btn-cancel-mini { background: var(--card-bg); border: 1px solid var(--card-border); color: inherit; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: flex; justify-content: center; align-items: center; transition: 0.2s; }
-        .btn-cancel-mini:hover { transform: scale(1.1); }
+        .active-timers { display: flex; flex-direction: column; gap: 10px; }
+        .timer-badge { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-radius: 16px; font-size: 13px; font-weight: 600; display: none; background: var(--btn-bg); border: 1px solid var(--card-border); box-shadow: 0 4px 15px rgba(0,0,0,0.02); }
+        .timer-badge i.icon { font-size: 16px; margin-right: 8px; }
+        .timer-badge.off i.icon, .timer-badge.off b { color: var(--danger); }
+        .timer-badge.on i.icon, .timer-badge.on b { color: var(--success); }
+        .btn-cancel-mini { background: rgba(0,0,0,0.05); border: none; color: var(--text-sub); width: 30px; height: 30px; border-radius: 50%; cursor: pointer; transition: 0.2s; display: flex; justify-content: center; align-items: center; }
+        [data-theme="dark"] .btn-cancel-mini { background: rgba(255,255,255,0.1); }
+        .btn-cancel-mini:hover { background: var(--danger); color: white; }
     </style>
 </head>
 <body>
 
-<div class="bg-blob blob-1"></div>
-<div class="bg-blob blob-2"></div>
-<div class="bg-blob blob-3"></div>
+<div class="ambient-bg">
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+</div>
 
 <div class="app-container">
-    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
-
     <div class="header">
-        <h1>JavizeFAN</h1>
-        <p>Smart Home Controller V2</p>
+        <div class="title-area">
+            <h1>JavizeFAN</h1>
+            <p>Smart Environment Control</p>
+        </div>
+        <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()"><i class="fa-solid fa-moon"></i></button>
     </div>
 
-    <div class="main-dashboard">
+    <div class="device-showcase">
         <div class="fan-wrapper">
             <div class="fan-glow" id="fan-glow"></div>
             <svg viewBox="0 0 100 160" class="stand-fan">
@@ -242,31 +233,40 @@
         </div>
     </div>
 
-    <div class="status-card">
-        <div class="status-header">
-            <div class="led-dot" id="led-indicator"></div>
-            <span id="status-label">Loading...</span>
+    <div class="info-panel">
+        <div class="status-row">
+            <div class="status-badge">
+                <div class="led-dot" id="led-indicator"></div>
+                <span id="status-label">Fetching data...</span>
+            </div>
+            <div class="sync-text" id="sync-status"><i class="fa-solid fa-rotate"></i> Syncing</div>
         </div>
-        <div class="time-info" id="time-info-container">
-            <div><i class="fa-solid fa-play"></i> <span id="started-at-label">--:--</span></div>
-            <div><i class="fa-solid fa-stopwatch"></i> <span id="uptime-label">00:00:00</span></div>
+        
+        <div class="time-metrics" id="time-metrics">
+            <div class="metric-item">
+                <div><i class="fa-solid fa-play"></i> Started At</div>
+                <span id="started-at-label">--:--</span>
+            </div>
+            <div class="metric-item">
+                <div><i class="fa-solid fa-stopwatch"></i> Uptime</div>
+                <span id="uptime-label">00:00:00</span>
+            </div>
         </div>
-        <div class="sync-status" id="sync-status">Syncing with hardware...</div>
     </div>
 
-    <div class="timer-module">
+    <div class="timer-section">
         <div class="timer-tabs">
-            <button id="tab-off" class="active" onclick="switchTab('off')">Auto-OFF</button>
-            <button id="tab-on" onclick="switchTab('on')">Auto-ON</button>
+            <button id="tab-off" class="active" onclick="switchTab('off')">Auto-OFF Timer</button>
+            <button id="tab-on" onclick="switchTab('on')">Auto-ON Timer</button>
         </div>
         
         <div class="timer-body">
             <div class="on-speed-config" id="speed-config-panel">
-                <p>Target Fan Speed</p>
-                <div class="segmented-control">
-                    <input type="radio" id="sp1" name="on_speed" value="1" checked><label for="sp1">Speed 1</label>
-                    <input type="radio" id="sp2" name="on_speed" value="2"><label for="sp2">Speed 2</label>
-                    <input type="radio" id="sp3" name="on_speed" value="3"><label for="sp3">Speed 3</label>
+                <label class="title">Fan Speed Upon Start</label>
+                <div class="speed-selector">
+                    <input type="radio" id="sp1" name="on_speed" value="1" checked><label for="sp1">1</label>
+                    <input type="radio" id="sp2" name="on_speed" value="2"><label for="sp2">2</label>
+                    <input type="radio" id="sp3" name="on_speed" value="3"><label for="sp3">3</label>
                 </div>
             </div>
 
@@ -289,18 +289,18 @@
                 <input type="time" id="exact-time">
             </div>
 
-            <button class="btn-set-timer btn-set-off" id="btn-submit-off" onclick="startTimer('off')">Set Auto-OFF</button>
-            <button class="btn-set-timer btn-set-on" id="btn-submit-on" onclick="startTimer('on')">Set Auto-ON</button>
+            <button class="btn-set-timer btn-set-off" id="btn-submit-off" onclick="startTimer('off')">Set OFF Timer</button>
+            <button class="btn-set-timer btn-set-on" id="btn-submit-on" onclick="startTimer('on')">Set ON Timer</button>
         </div>
     </div>
 
     <div class="active-timers">
         <div class="timer-badge off" id="badge-off">
-            <span><i class="fa-regular fa-clock"></i> Turning OFF in: <b id="text-off"></b></span>
+            <div><i class="fa-solid fa-power-off icon"></i> Auto-OFF in <b id="text-off">--</b></div>
             <button class="btn-cancel-mini" onclick="cancelTimer('off')"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="timer-badge on" id="badge-on">
-            <span><i class="fa-regular fa-clock"></i> Turning ON (Spd <span id="on-target-spd"></span>) in: <b id="text-on"></b></span>
+            <div><i class="fa-solid fa-bolt icon"></i> Auto-ON (Spd <span id="on-target-spd">1</span>) in <b id="text-on">--</b></div>
             <button class="btn-cancel-mini" onclick="cancelTimer('on')"><i class="fa-solid fa-xmark"></i></button>
         </div>
     </div>
@@ -311,7 +311,7 @@
     const BLYNK_AUTH_TOKEN = "XBzHPWNzCK_7bRzeVCQcleCkrb8we3TS"; 
     const BLYNK_SERVER = "blynk.cloud"; 
 
-    // Theme Management
+    // Theme Logic
     const htmlEl = document.documentElement;
     const themeBtn = document.getElementById('theme-btn');
     if(localStorage.getItem('theme') === 'light') {
@@ -326,10 +326,10 @@
         }
     }
 
-    // Load Data
+    // Sync Data on Load
     window.addEventListener('load', async () => {
-        const syncLabel = document.getElementById('sync-status');
-        syncLabel.style.display = "block";
+        const syncText = document.getElementById('sync-status');
+        syncText.style.display = "block";
         try {
             const [res5, res3, res2] = await Promise.all([
                 fetch(`https://${BLYNK_SERVER}/external/api/get?token=${BLYNK_AUTH_TOKEN}&pin=V5`).then(r => r.text()),
@@ -340,13 +340,13 @@
             else if (res3 === "1") setFan('V3', 2, true, true);
             else if (res2 === "1") setFan('V2', 1, true, true);
             else setFan('V1', 0, true, true);
-            syncLabel.innerText = "Synced successfully."; setTimeout(() => { syncLabel.style.display = "none"; }, 2000);
+            syncText.style.display = "none";
         } catch (error) {
-            syncLabel.innerText = "Sync failed."; syncLabel.style.color = "var(--danger)"; setFan('V1', 0, true, true);
+            syncText.style.display = "none"; setFan('V1', 0, true, true);
         }
     });
 
-    // Fan Core & Time Tracking
+    // Uptime & Status Core
     let turnOnTime = null, uptimeInterval = null, naturalMode = false, naturalInterval = null;
 
     function updateUptime() {
@@ -355,7 +355,15 @@
         const h = Math.floor(diff / 3600).toString().padStart(2, '0');
         const m = Math.floor((diff % 3600) / 60).toString().padStart(2, '0');
         const s = (diff % 60).toString().padStart(2, '0');
-        document.getElementById('uptime-label').innerText = `${h > 0 ? h+'h ' : ''}${m}m ${s}s`;
+        document.getElementById('uptime-label').innerText = `${h > 0 ? h+':' : ''}${m}:${s}`;
+    }
+
+    function initTurnOnVisuals() {
+        turnOnTime = Date.now(); 
+        const timeStr = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + " น.";
+        document.getElementById('started-at-label').innerText = timeStr;
+        document.getElementById('time-metrics').style.display = "flex";
+        updateUptime(); uptimeInterval = setInterval(updateUptime, 1000);
     }
 
     function toggleNaturalWind() {
@@ -374,18 +382,10 @@
         const speeds = [ { pin: 'V2', speed: 1 }, { pin: 'V3', speed: 2 }, { pin: 'V5', speed: 3 } ];
         const rand = speeds[Math.floor(Math.random() * speeds.length)];
         setFan(rand.pin, rand.speed, true, false);
-        document.getElementById('status-label').innerText = `Natural Wind 🍃 (Spd ${rand.speed})`;
+        document.getElementById('status-label').innerText = `Natural Wind (Spd ${rand.speed})`;
         document.getElementById('led-indicator').style.background = "#06b6d4"; 
-        document.getElementById('led-indicator').style.boxShadow = "0 0 12px #06b6d4";
-        document.getElementById('fan-glow').style.background = "rgba(6, 182, 212, 0.3)";
-    }
-
-    function initTurnOnVisuals() {
-        turnOnTime = Date.now(); 
-        const startedTime = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
-        document.getElementById('started-at-label').innerText = startedTime;
-        document.getElementById('time-info-container').style.display = "flex";
-        updateUptime(); uptimeInterval = setInterval(updateUptime, 1000);
+        document.getElementById('led-indicator').style.boxShadow = "0 0 0 4px rgba(6,182,212,0.2)";
+        document.getElementById('fan-glow').style.background = "rgba(6, 182, 212, 0.4)";
     }
 
     function setFan(pin, speed, isAuto = false, syncOnly = false) {
@@ -403,23 +403,22 @@
             blades.classList.add(`spin-${speed}`);
             if(!isAuto || syncOnly) {
                 if(!turnOnTime) initTurnOnVisuals();
-                if(speed === 1) { led.style.background = "var(--success)"; led.style.boxShadow = "0 0 12px var(--success)"; glow.style.background = "rgba(16, 185, 129, 0.3)"; label.innerText = "Speed 1 (Low)"; }
-                if(speed === 2) { led.style.background = "var(--warning)"; led.style.boxShadow = "0 0 12px var(--warning)"; glow.style.background = "rgba(245, 158, 11, 0.3)"; label.innerText = "Speed 2 (Med)"; }
-                if(speed === 3) { led.style.background = "var(--danger)"; led.style.boxShadow = "0 0 12px var(--danger)"; glow.style.background = "rgba(239, 68, 68, 0.3)"; label.innerText = "Speed 3 (High)"; }
+                if(speed === 1) { led.style.background = "var(--success)"; led.style.boxShadow = "0 0 0 4px rgba(16,185,129,0.2)"; glow.style.background = "rgba(16, 185, 129, 0.35)"; label.innerText = "Running: Speed 1"; }
+                if(speed === 2) { led.style.background = "var(--warning)"; led.style.boxShadow = "0 0 0 4px rgba(245,158,11,0.2)"; glow.style.background = "rgba(245, 158, 11, 0.35)"; label.innerText = "Running: Speed 2"; }
+                if(speed === 3) { led.style.background = "var(--danger)"; led.style.boxShadow = "0 0 0 4px rgba(244,63,94,0.2)"; glow.style.background = "rgba(244, 63, 94, 0.35)"; label.innerText = "Running: Speed 3"; }
             }
         } else {
-            led.style.background = "var(--text-sub)"; led.style.boxShadow = "none"; glow.style.background = "transparent"; label.innerText = "Power OFF";
-            turnOnTime = null; clearInterval(uptimeInterval); document.getElementById('time-info-container').style.display = "none";
+            led.style.background = "var(--text-sub)"; led.style.boxShadow = "0 0 0 4px rgba(100,116,139,0.1)"; glow.style.background = "transparent"; label.innerText = "System OFF";
+            turnOnTime = null; clearInterval(uptimeInterval); document.getElementById('time-metrics').style.display = "none";
         }
         if(!syncOnly) fetch(`https://${BLYNK_SERVER}/external/api/update?token=${BLYNK_AUTH_TOKEN}&pin=${pin}&value=1`, { mode: 'no-cors' }).catch(e=>console.log(e));
     }
 
     // Timer Logic
-    let currentTab = 'off', currentMode = 'cd';
+    let currentMode = 'cd';
     let timers = { on: { interval: null }, off: { interval: null } };
 
     function switchTab(tab) {
-        currentTab = tab;
         document.getElementById('tab-on').classList.toggle('active', tab === 'on');
         document.getElementById('tab-off').classList.toggle('active', tab === 'off');
         document.getElementById('btn-submit-on').style.display = tab === 'on' ? 'block' : 'none';
