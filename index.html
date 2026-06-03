@@ -326,9 +326,20 @@
             clearInterval(naturalInterval); 
             document.getElementById('btn-natural').classList.remove('active'); 
             
-            // สั่งล็อคพัดลมให้เป็นเบอร์ล่าสุดที่ทำงานอยู่ ณ วินาทีนั้น
             if(!fromFirebase) {
-                setFan(currentFanPin, currentFanSpeed);
+                // ส่งคำสั่งไป Blynk ทันทีเพื่อล็อคความเร็วปัจจุบันไว้
+                fetch(`https://${BLYNK_SERVER}/external/api/update?token=${BLYNK_AUTH_TOKEN}&pin=${currentFanPin}&value=1`, { mode: 'no-cors' }).catch(e=>console.log(e));
+                
+                // อัปเดตหน้า UI เป็นสีของเบอร์ปกติ (แดง/ส้ม/เขียว) โดยบล็อกไม่ให้ setFan ส่งข้อมูลซ้ำ
+                setFan(currentFanPin, currentFanSpeed, false, true, true);
+                
+                // รวบยอดอัปเดต Firebase ในครั้งเดียว (แก้ปัญหาบั๊กกดแล้วเด้งเปิดกลับมาเอง)
+                fanStateRef.update({ 
+                    naturalMode: false,
+                    speed: currentFanSpeed,
+                    pin: currentFanPin,
+                    timestamp: currentFanSpeed > 0 ? Date.now() : null
+                });
             }
         } else {
             // --- กรณีกดเพื่อ "เปิด" โหมดลมธรรมชาติ ---
@@ -337,65 +348,39 @@
             initTurnOnVisuals();
             
             if (currentFanSpeed === 0) {
-                // ถ้าพัดลมปิดอยู่ (เบอร์ 0) ให้สุ่มเบอร์แรกขึ้นมาเลย
+                // ถ้าพัดลมปิดอยู่ ให้สุ่มเบอร์แรกขึ้นมาเลย
                 triggerRandomSpeed(); 
             } else {
-                // ถ้าพัดลมเปิดอยู่แล้ว (เช่น เบอร์ 2) ให้เริ่มจากเบอร์นั้นก่อน แค่เปลี่ยนสี UI ให้เป็นสีฟ้า
+                // ถ้าพัดลมเปิดอยู่ (เช่น เบอร์ 2) ให้เริ่มจากเบอร์นั้นก่อน แค่เปลี่ยนสี UI เป็นโหมดลมธรรมชาติ
                 document.getElementById('status-label').innerText = `Natural Wind (Spd ${currentFanSpeed})`;
                 document.getElementById('led-indicator').style.background = "#06b6d4"; 
                 document.getElementById('led-indicator').style.boxShadow = "0 0 0 4px rgba(6,182,212,0.2)";
                 document.getElementById('fan-glow').style.background = "rgba(6, 182, 212, 0.4)";
             }
             
-            // เริ่มนับเวลาเพื่อสุ่มเปลี่ยนความเร็วในอีก 6 วินาทีข้างหน้า
             naturalInterval = setInterval(triggerRandomSpeed, 6000);
+            
+            if(!fromFirebase) {
+                fanStateRef.update({ naturalMode: true });
+            }
         }
-
-        if(!fromFirebase) {
-            fanStateRef.update({ naturalMode: naturalMode });
-        }
-    }
-
-    function triggerRandomSpeed() {
-        if(!naturalMode) return;
-        const speeds = [ { pin: 'V2', speed: 1 }, { pin: 'V3', speed: 2 }, { pin: 'V5', speed: 3 } ];
-        const rand = speeds[Math.floor(Math.random() * speeds.length)];
-        
-        // บันทึกสถานะปัจจุบันไว้เสมอ
-        currentFanSpeed = rand.speed;
-        currentFanPin = rand.pin;
-        
-        document.querySelectorAll('.btn-speed:not(#btn-natural)').forEach(b => b.classList.remove('active'));
-        document.getElementById(`btn-${rand.speed}`).classList.add('active');
-        
-        const blades = document.getElementById('fan-blades');
-        blades.className.baseVal = 'blades'; 
-        blades.classList.add(`spd-${rand.speed}`);
-        
-        if(rand.speed === 1) targetVelocity = 8;
-        if(rand.speed === 2) targetVelocity = 16;
-        if(rand.speed === 3) targetVelocity = 28;
-
-        document.getElementById('status-label').innerText = `Natural Wind (Spd ${rand.speed})`;
-        document.getElementById('led-indicator').style.background = "#06b6d4"; 
-        document.getElementById('led-indicator').style.boxShadow = "0 0 0 4px rgba(6,182,212,0.2)";
-        document.getElementById('fan-glow').style.background = "rgba(6, 182, 212, 0.4)";
-
-        // สั่งงานฮาร์ดแวร์จริงๆ ผ่าน Blynk
-        fetch(`https://${BLYNK_SERVER}/external/api/update?token=${BLYNK_AUTH_TOKEN}&pin=${rand.pin}&value=1`, { mode: 'no-cors' }).catch(e=>console.log(e));
     }
 
     function setFan(pin, speed, isAuto = false, syncOnly = false, fromFirebase = false) {
         if(!isAuto && !syncOnly && navigator.vibrate) navigator.vibrate(50);
         
-        // บันทึกสถานะการกดแบบปกติเอาไว้ด้วยเสมอ
+        // บันทึกสถานะปัจจุบันเสมอ
         currentFanSpeed = speed;
         currentFanPin = pin;
 
+        let disableNaturalFlag = false;
+
+        // ถ้ายูสเซอร์กดเปลี่ยนเบอร์พัดลมเองตอนโหมดลมธรรมชาติทำงานอยู่ ให้ปิดโหมดลมธรรมชาติทิ้ง
         if(!isAuto && !syncOnly && naturalMode) { 
-            naturalMode = false; clearInterval(naturalInterval); 
+            naturalMode = false; 
+            clearInterval(naturalInterval); 
             document.getElementById('btn-natural').classList.remove('active'); 
-            if(!fromFirebase) fanStateRef.update({ naturalMode: false });
+            disableNaturalFlag = true;
         }
 
         const blades = document.getElementById('fan-blades'), led = document.getElementById('led-indicator');
@@ -427,14 +412,18 @@
         if(!syncOnly && !fromFirebase) {
             fetch(`https://${BLYNK_SERVER}/external/api/update?token=${BLYNK_AUTH_TOKEN}&pin=${pin}&value=1`, { mode: 'no-cors' }).catch(e=>console.log(e));
             
-            fanStateRef.update({ 
+            // รวบยอดอัปเดต Firebase ให้ส่งไปพร้อมกันในรอบเดียว
+            let dbUpdates = { 
                 speed: speed, 
                 pin: pin,
                 timestamp: speed > 0 ? Date.now() : null
-            });
+            };
+            if (disableNaturalFlag) {
+                dbUpdates.naturalMode = false;
+            }
+            fanStateRef.update(dbUpdates);
         }
     }
-
     // ----------------------------------------------------
     // Firebase Realtime Listeners
     // ----------------------------------------------------
