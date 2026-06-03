@@ -272,8 +272,12 @@
         }
     }
 
-    // Uptime Core
+   // Uptime Core
     let turnOnTime = null, uptimeInterval = null, naturalMode = false, naturalInterval = null;
+    
+    // เพิ่มตัวแปรสำหรับจำความเร็วล่าสุดของโหมดลมธรรมชาติ
+    let currentNaturalSpeed = 0; 
+    let currentNaturalPin = 'V1';
 
     // --- ระบบแรงเฉื่อยใบพัดลม (Inertia) ---
     let currentRotation = 0;
@@ -281,7 +285,6 @@
     let targetVelocity = 0;
 
     function animateFanBlades() {
-        // สูตรคำนวณค่อยๆ ปรับความเร็วปัจจุบันให้เข้าหาเป้าหมาย (สร้างแรงเฉื่อย)
         currentVelocity += (targetVelocity - currentVelocity) * 0.015; 
         currentRotation += currentVelocity;
         
@@ -291,7 +294,6 @@
         }
         requestAnimationFrame(animateFanBlades);
     }
-    // เริ่ม loop อนิเมชั่นทันทีที่โหลดเสร็จ
     requestAnimationFrame(animateFanBlades);
     // ------------------------------------
 
@@ -319,11 +321,21 @@
         if(!fromFirebase && navigator.vibrate) navigator.vibrate(50);
         
         if(naturalMode) {
+            // กรณีกด "ปิด" โหมดลมธรรมชาติ
             naturalMode = false; 
             clearInterval(naturalInterval); 
             document.getElementById('btn-natural').classList.remove('active'); 
-            if(!fromFirebase) setFan('V1', 0); 
+            
+            // ให้เซ็ตพัดลมเป็นเบอร์ล่าสุดที่ระบบสุ่มค้างไว้ (แทนที่จะเป็น 0)
+            if(!fromFirebase) {
+                if (currentNaturalSpeed > 0) {
+                    setFan(currentNaturalPin, currentNaturalSpeed);
+                } else {
+                    setFan('V1', 0); // เผื่อกรณีผิดพลาดให้ปิด
+                }
+            }
         } else {
+            // กรณีกด "เปิด" โหมดลมธรรมชาติ
             naturalMode = true; 
             document.getElementById('btn-natural').classList.add('active');
             initTurnOnVisuals();
@@ -340,6 +352,10 @@
         if(!naturalMode) return;
         const speeds = [ { pin: 'V2', speed: 1 }, { pin: 'V3', speed: 2 }, { pin: 'V5', speed: 3 } ];
         const rand = speeds[Math.floor(Math.random() * speeds.length)];
+        
+        // จำค่าล่าสุดไว้ เผื่อผู้ใช้กดปิดโหมดจะได้ใช้ค่านี้
+        currentNaturalSpeed = rand.speed;
+        currentNaturalPin = rand.pin;
         
         // 1. จัดการ UI
         document.querySelectorAll('.btn-speed:not(#btn-natural)').forEach(b => b.classList.remove('active'));
@@ -358,7 +374,7 @@
         document.getElementById('led-indicator').style.boxShadow = "0 0 0 4px rgba(6,182,212,0.2)";
         document.getElementById('fan-glow').style.background = "rgba(6, 182, 212, 0.4)";
 
-        // 2. ส่งคำสั่งไป Blynk ทันที! เพื่อให้ลมธรรมชาติทำงานกับฮาร์ดแวร์จริง
+        // 2. ส่งคำสั่งไป Blynk ทันที!
         fetch(`https://${BLYNK_SERVER}/external/api/update?token=${BLYNK_AUTH_TOKEN}&pin=${rand.pin}&value=1`, { mode: 'no-cors' }).catch(e=>console.log(e));
     }
 
@@ -381,7 +397,6 @@
         if(speed > 0) {
             blades.classList.add(`spd-${speed}`);
             
-            // ตั้งเป้าหมายความเร็ว (JS จะค่อยๆ เร่งให้)
             if(speed === 1) targetVelocity = 8;
             if(speed === 2) targetVelocity = 16;
             if(speed === 3) targetVelocity = 28;
@@ -393,7 +408,7 @@
                 if(speed === 3) { led.style.background = "var(--danger)"; led.style.boxShadow = "0 0 0 4px rgba(244,63,94,0.2)"; glow.style.background = "rgba(244, 63, 94, 0.35)"; label.innerText = "Running: Speed 3"; }
             }
         } else {
-            targetVelocity = 0; // ตั้งเป้าหมายเป็น 0 ใบพัดจะค่อยๆ ชะลอจนหยุดเอง
+            targetVelocity = 0; 
             led.style.background = "var(--text-sub)"; led.style.boxShadow = "0 0 0 4px rgba(100,116,139,0.1)"; glow.style.background = "transparent"; label.innerText = "System OFF";
             turnOnTime = null; clearInterval(uptimeInterval); document.getElementById('time-metrics').style.display = "none";
         }
