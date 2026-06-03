@@ -306,15 +306,22 @@
         document.getElementById('uptime-label').innerText = `${h > 0 ? h+':' : ''}${m}:${s}`;
     }
 
-    function initTurnOnVisuals(timestamp = Date.now()) {
+    function initTurnOnVisuals() {
+        // ถ้าไม่มีเวลาในระบบเลย (กดเปิดใหม่) ให้ใช้เวลาปัจจุบัน
+        // แต่ถ้ารีเฟรชมาแล้ว Firebase ส่งเวลาเดิมมาให้ ระบบจะข้ามบรรทัดนี้ไปใช้เวลาเดิม
         if(!turnOnTime) {
-            turnOnTime = timestamp; 
-            const d = new Date(timestamp);
-            const timeStr = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + " น.";
-            document.getElementById('started-at-label').innerText = timeStr;
-            document.getElementById('time-metrics').style.display = "flex";
-            updateUptime(); uptimeInterval = setInterval(updateUptime, 1000);
+            turnOnTime = Date.now(); 
         }
+        
+        // สั่งให้แสดงผลหน้าจอและเริ่มนับเวลาเสมอ
+        const d = new Date(turnOnTime);
+        const timeStr = d.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + " น.";
+        document.getElementById('started-at-label').innerText = timeStr;
+        document.getElementById('time-metrics').style.display = "flex";
+        
+        clearInterval(uptimeInterval); // ล้างตัวนับเวลาเก่าทิ้งก่อนกันมันนับซ้อน
+        updateUptime(); 
+        uptimeInterval = setInterval(updateUptime, 1000);
     }
 
     function toggleNaturalWind(fromFirebase = false) {
