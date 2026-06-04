@@ -19,41 +19,24 @@ long autoOffSeconds = 0;
 long autoOnSeconds = 0;
 int autoOnTargetSpeed = 1;
 
-// ฟังก์ชันสำหรับสั่งปิดทุกอัน
-void turnOffAll() {
-  digitalWrite(BT1, HIGH); // ปิด D1 (ถึงจะเว้นไว้ก็สั่งปิดเพื่อความชัวร์)
-  digitalWrite(BT2, HIGH); // ปิด D2
-  digitalWrite(BT3, HIGH); // ปิด D3
-  digitalWrite(BT5, HIGH); // ปิด D5
-  
-  // รีเซ็ตไฟสถานะปุ่มในแอป Blynk
-  Blynk.virtualWrite(V1, 0);
-  Blynk.virtualWrite(V2, 0);
-  Blynk.virtualWrite(V3, 0);
-  Blynk.virtualWrite(V5, 0);
-}
-
 void setFanSpeed(int speed) {
-  turnOffAll(); // ตัดไฟทุกอันก่อนเสมอ
+  // 1. ส่วนฮาร์ดแวร์: ทำงานรวดเดียวจบในระดับไมโครวินาที
+  // ต้องตัดไฟทุกอันก่อนเสมอเพื่อป้องกันขดลวดมอเตอร์พัดลมช็อต (Break before make)
+  digitalWrite(BT1, HIGH);
+  digitalWrite(BT2, HIGH);
+  digitalWrite(BT3, HIGH);
+  digitalWrite(BT5, HIGH);
   
-  if (speed == 0) {
-    return; // สั่งปิด จบการทำงาน
-  }
-  
-  switch (speed) {
-    case 1:
-      digitalWrite(BT2, LOW); // **ขยับมาใช้ D2 (เว้น D1 ไว้)**
-      Blynk.virtualWrite(V2, 1); 
-      break;
-    case 2:
-      digitalWrite(BT3, LOW); // **ขยับมาใช้ D3**
-      Blynk.virtualWrite(V3, 1); 
-      break;
-    case 3:
-      digitalWrite(BT5, LOW); // **ใช้ D5 (ช่องนี้ถูกอยู่แล้ว)**
-      Blynk.virtualWrite(V5, 1); 
-      break;
-  }
+  // สั่งเปิดเบอร์ใหม่ทันที (พัดลมจะเปลี่ยนเบอร์สมูท ไม่สะดุด)
+  if (speed == 1) digitalWrite(BT2, LOW);
+  if (speed == 2) digitalWrite(BT3, LOW);
+  if (speed == 3) digitalWrite(BT5, LOW);
+
+  // 2. ส่วนซอฟต์แวร์: อัปเดตหน้าจอ Blynk หลังจากสับสวิตช์พัดลมเสร็จแล้ว
+  Blynk.virtualWrite(V1, speed == 0 ? 1 : 0);
+  Blynk.virtualWrite(V2, speed == 1 ? 1 : 0);
+  Blynk.virtualWrite(V3, speed == 2 ? 1 : 0);
+  Blynk.virtualWrite(V5, speed == 3 ? 1 : 0);
 }
 
 void timerTick() {
@@ -74,7 +57,12 @@ void setup() {
   pinMode(BT3, OUTPUT);
   pinMode(BT5, OUTPUT);
   
-  turnOffAll(); 
+  // ปิดรีเลย์ทุกตัวตอนบอร์ดเพิ่งเปิด
+  digitalWrite(BT1, HIGH);
+  digitalWrite(BT2, HIGH);
+  digitalWrite(BT3, HIGH);
+  digitalWrite(BT5, HIGH);
+  
   Blynk.begin(auth, ssid, pass);
   timer.setInterval(1000L, timerTick); 
 }
@@ -85,7 +73,7 @@ void loop() {
 }
 
 // === รับคำสั่งจากหน้าเว็บ/แอป ===
-BLYNK_WRITE(V1) { if (param.asInt()) setFanSpeed(0); } // กดปุ่มปิด 
+BLYNK_WRITE(V1) { if (param.asInt()) setFanSpeed(0); } 
 BLYNK_WRITE(V2) { if (param.asInt()) setFanSpeed(1); else setFanSpeed(0); } 
 BLYNK_WRITE(V3) { if (param.asInt()) setFanSpeed(2); else setFanSpeed(0); } 
 BLYNK_WRITE(V5) { if (param.asInt()) setFanSpeed(3); else setFanSpeed(0); } 
