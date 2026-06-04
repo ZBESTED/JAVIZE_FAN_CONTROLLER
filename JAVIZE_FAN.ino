@@ -5,78 +5,63 @@
 #include <ESP8266WiFi.h>
 
 // --- กำหนดขาพินรีเลย์ ---
-#define RELAY_1 D1 // สปีด 1 (V1)
-#define RELAY_2 D2 // สปีด 2 (V2)
-#define RELAY_3 D3 // สปีด 3 (V3)
-#define RELAY_4 D5 // สปีด 4 (V5) 
+#define RELAY_1 D1 // สปีด 1
+#define RELAY_2 D2 // สปีด 2
+#define RELAY_3 D3 // สปีด 3
+#define RELAY_4 D5 // ใช้ขา D5 ตามโค้ดเดิมของคุณ
 
 char auth[] = "XBzHPWNzCK_7bRzeVCQcleCkrb8we3TS";
 char ssid[] = "JAOSAMUT_2.4G";
 char pass[] = "09864261";
 
-WidgetLED BT1Blynk(V10);
-WidgetLED BT2Blynk(V11);
-WidgetLED BT3Blynk(V12);
-WidgetLED BT5Blynk(V13);
-
 BlynkTimer timer;
 
-// --- ตัวแปรสำหรับระบบนับเวลา (นับเป็นวินาที) ---
+// ตัวแปรนับเวลา
 long autoOffSeconds = 0;
 long autoOnSeconds = 0;
 int autoOnTargetSpeed = 1;
 
-// ฟังก์ชันเคลียร์รีเลย์และอัปเดตหน้าจอแอปให้เป็น Off ทั้งหมด
+// ฟังก์ชันปิดทุกอย่าง
 void turnOffAll() {
   digitalWrite(RELAY_1, HIGH);
   digitalWrite(RELAY_2, HIGH);
   digitalWrite(RELAY_3, HIGH);
   digitalWrite(RELAY_4, HIGH);
   
-  BT1Blynk.off();
-  BT2Blynk.off();
-  BT3Blynk.off();
-  BT5Blynk.off();
-  
+  // อัปเดตสถานะปุ่มในแอปให้ดับหมดก่อน
   Blynk.virtualWrite(V1, 0);
   Blynk.virtualWrite(V2, 0);
   Blynk.virtualWrite(V3, 0);
   Blynk.virtualWrite(V5, 0);
 }
 
-// ฟังก์ชันจัดการเปิดพัดลมตามเบอร์
+// ฟังก์ชันเปิดพัดลมตามเบอร์
 void setFanSpeed(int speed) {
-  turnOffAll(); // ปิดทุกตัวก่อนเสมอเพื่อป้องกันไฟชนกัน
+  turnOffAll(); 
   
-  if (speed == 0) return; // ถ้าสั่ง 0 (ปิด) ให้จบการทำงานแค่นี้
+  if (speed == 0) {
+    Blynk.virtualWrite(V1, 1); // ถ้าสั่งปิด ให้ปุ่มเบอร์ 0 (V1) ติดไฟแจ้งสถานะ
+    return;
+  }
   
   switch (speed) {
     case 1:
       digitalWrite(RELAY_1, LOW);
-      BT1Blynk.on();
-      Blynk.virtualWrite(V1, 1);
+      Blynk.virtualWrite(V2, 1); // ปุ่มเบอร์ 1 คือ V2
       break;
     case 2:
       digitalWrite(RELAY_2, LOW);
-      BT2Blynk.on();
-      Blynk.virtualWrite(V2, 1);
+      Blynk.virtualWrite(V3, 1); // ปุ่มเบอร์ 2 คือ V3
       break;
     case 3:
-      digitalWrite(RELAY_3, LOW);
-      BT3Blynk.on();
-      Blynk.virtualWrite(V3, 1);
-      break;
-    case 4: // ใช้ V5
-      digitalWrite(RELAY_4, LOW);
-      BT5Blynk.on();
-      Blynk.virtualWrite(V5, 1);
+      digitalWrite(RELAY_4, LOW); // ใช้ D5 แทนตามบอร์ดคุณ
+      Blynk.virtualWrite(V5, 1); // ปุ่มเบอร์ 3 คือ V5
       break;
   }
 }
 
-// --- ฟังก์ชันนี้จะถูกเรียกทุกๆ 1 วินาที (1000ms) ---
+// ฟังก์ชันนับเวลาถอยหลัง (รันทุกๆ 1 วินาที)
 void timerTick() {
-  // 1. นับเวลาถอยหลังเพื่อปิด (Auto-OFF)
   if (autoOffSeconds > 0) {
     autoOffSeconds--;
     if (autoOffSeconds == 0) {
@@ -85,7 +70,6 @@ void timerTick() {
     }
   }
   
-  // 2. นับเวลาถอยหลังเพื่อเปิด (Auto-ON)
   if (autoOnSeconds > 0) {
     autoOnSeconds--;
     if (autoOnSeconds == 0) {
@@ -97,49 +81,32 @@ void timerTick() {
 
 void setup() {
   Serial.begin(9600);
-  
   pinMode(RELAY_1, OUTPUT);
   pinMode(RELAY_2, OUTPUT);
   pinMode(RELAY_3, OUTPUT);
   pinMode(RELAY_4, OUTPUT);
   
-  turnOffAll(); // รีเซ็ตทุกอย่างให้เป็น OFF ก่อนตอนเปิดบอร์ด
-  
+  turnOffAll(); 
   Blynk.begin(auth, ssid, pass);
-  
-  // สั่งให้ timer เรียกใช้ฟังก์ชัน timerTick ทุกๆ 1 วินาที
-  timer.setInterval(1000L, timerTick);
+  timer.setInterval(1000L, timerTick); // สั่งให้นับเวลาทุกๆ 1000ms (1 วินาที)
 }
 
 void loop() {
   Blynk.run();
-  timer.run(); // ต้องรัน timer ใน loop เสมอ
+  timer.run(); 
 }
 
-// ==========================================
-// ส่วนรับคำสั่งจากปุ่มเปิด-ปิดปกติบนแอป (Manual)
-// ==========================================
-BLYNK_WRITE(V1) { if (param.asInt()) setFanSpeed(1); else setFanSpeed(0); }
-BLYNK_WRITE(V2) { if (param.asInt()) setFanSpeed(2); else setFanSpeed(0); }
-BLYNK_WRITE(V3) { if (param.asInt()) setFanSpeed(3); else setFanSpeed(0); }
-BLYNK_WRITE(V5) { if (param.asInt()) setFanSpeed(4); else setFanSpeed(0); }
-BLYNK_WRITE(V4) { setFanSpeed(0); } // ปุ่ม ปิดทั้งหมด
+// === รับคำสั่งจากปุ่มกดในแอป/เว็บ ===
+BLYNK_WRITE(V1) { if (param.asInt()) setFanSpeed(0); } // กด V1 = ปิด (เบอร์ 0)
+BLYNK_WRITE(V2) { if (param.asInt()) setFanSpeed(1); else setFanSpeed(0); } // กด V2 = เบอร์ 1
+BLYNK_WRITE(V3) { if (param.asInt()) setFanSpeed(2); else setFanSpeed(0); } // กด V3 = เบอร์ 2
+BLYNK_WRITE(V5) { if (param.asInt()) setFanSpeed(3); else setFanSpeed(0); } // กด V5 = เบอร์ 3
 
-// ==========================================
-// ส่วนรับคำสั่งตั้งเวลามาจากฝั่ง Web (ส่งมาเป็นวินาที)
-// ==========================================
-BLYNK_WRITE(V6) { 
-  autoOffSeconds = param.asInt(); 
-  Serial.print("Set Auto OFF in (sec): "); Serial.println(autoOffSeconds);
-}
-
-BLYNK_WRITE(V7) { 
-  autoOnSeconds = param.asInt(); 
-  Serial.print("Set Auto ON in (sec): "); Serial.println(autoOnSeconds);
-}
-
+// === รับคำสั่งตั้งเวลา ===
+BLYNK_WRITE(V6) { autoOffSeconds = param.asInt(); }
+BLYNK_WRITE(V7) { autoOnSeconds = param.asInt(); }
 BLYNK_WRITE(V8) { 
   autoOnTargetSpeed = param.asInt(); 
   if (autoOnTargetSpeed < 1) autoOnTargetSpeed = 1;
-  if (autoOnTargetSpeed > 4) autoOnTargetSpeed = 4;
+  if (autoOnTargetSpeed > 3) autoOnTargetSpeed = 3;
 }
