@@ -228,17 +228,23 @@
         </div>
     </div>
 
-    <div class="active-timers">
+    
+   <div class="active-timers">
         <div class="timer-badge off" id="badge-off">
-            <div><i class="fa-solid fa-power-off icon"></i> Auto-OFF in <b id="text-off">--</b></div>
+            <div>
+                <i class="fa-solid fa-power-off icon"></i> Auto-OFF in <b id="text-off">--</b>
+                <div id="target-time-off" style="font-size: 11px; font-weight: 600; opacity: 0.6; margin-top: 4px; margin-left: 24px;"></div>
+            </div>
             <button class="btn-cancel-mini" onclick="cancelTimer('off', false)"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <div class="timer-badge on" id="badge-on">
-            <div><i class="fa-solid fa-bolt icon"></i> Auto-ON (Spd <span id="on-target-spd">1</span>) in <b id="text-on">--</b></div>
+            <div>
+                <i class="fa-solid fa-bolt icon"></i> Auto-ON (Spd <span id="on-target-spd">1</span>) in <b id="text-on">--</b>
+                <div id="target-time-on" style="font-size: 11px; font-weight: 600; opacity: 0.6; margin-top: 4px; margin-left: 24px;"></div>
+            </div>
             <button class="btn-cancel-mini" onclick="cancelTimer('on', false)"><i class="fa-solid fa-xmark"></i></button>
         </div>
     </div>
-</div>
 
 <script>
     // ----------------------------------------------------
@@ -586,7 +592,34 @@
         document.getElementById('ui-cd').style.display = mode === 'cd' ? 'flex' : 'none';
         document.getElementById('ui-time').style.display = mode === 'time' ? 'block' : 'none';
     }
+    
+    function startLocalTimerUI(type, targetMs, speed = null) {
+        cancelTimer(type, true); 
+        if(type === 'on' && speed) document.getElementById('on-target-spd').innerText = speed;
+        document.getElementById(`badge-${type}`).style.display = "flex";
 
+        // --- คำนวณเวลาเป้าหมายและแสดงผลแบบ 12h (AM/PM) ---
+        const targetDate = new Date(targetMs);
+        const timeStr = targetDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        document.getElementById(`target-time-${type}`).innerText = `At ${timeStr}`;
+
+        // เปิด Wake Lock ป้องกันจอดับ (ถ้าเบราว์เซอร์รองรับ)
+        if (typeof manageWakeLock === 'function') {
+            manageWakeLock(true);
+        }
+
+        activeIntervals[type] = setInterval(() => {
+            const distance = targetMs - Date.now();
+            if (distance <= 0) {
+                executeTimerAction(type, speed);
+            } else {
+                const hr = Math.floor(distance / 3600000);
+                const min = Math.floor((distance % 3600000) / 60000);
+                const sec = Math.floor((distance % 60000) / 1000);
+                document.getElementById(`text-${type}`).innerText = `${hr > 0 ? hr+'h ' : ''}${min}m ${sec}s`;
+            }
+        }, 1000);
+    }
     function startTimer(type) {
         if(navigator.vibrate) navigator.vibrate(30);
         let targetMs = 0; const now = new Date();
@@ -624,16 +657,30 @@
     }
 
     function executeTimerAction(type, speed) {
-        cancelTimer(type, true);
-        
+    cancelTimer(type, true);
+    
         if(type === 'on') {
-            // แมปปิ้งสปีด 1=V2, 2=V3, 3=V5
             const pin = speed === 1 ? 'V2' : (speed === 2 ? 'V3' : 'V5');
             setFan(pin, speed, true);
         }
+        
         if(type === 'off') {
-            // สั่งปิดไปที่ V1
+            // --- จุดที่แก้ไข: บังคับปิดโหมดลมธรรมชาติถ้ามันกำลังทำงานอยู่ ---
+            if (naturalMode) {
+                naturalMode = false;
+                clearInterval(naturalInterval); // ฆ่าลูปสุ่มเบอร์ทิ้ง
+                document.getElementById('btn-natural').classList.remove('active');
+            }
+            
             setFan('V1', 0, true); 
+            
+            // อัปเดตบอก Firebase ด้วยว่าระบบปิดสนิทแล้ว โหมดธรรมชาติก็ดับแล้ว
+            fanStateRef.update({ 
+                speed: 0, 
+                pin: 'V1', 
+                naturalMode: false,
+                timestamp: null 
+            });
         }
         
         fanTimerRef.child(type).remove();
