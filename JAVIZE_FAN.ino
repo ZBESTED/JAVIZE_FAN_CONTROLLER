@@ -4,91 +4,79 @@
 #include <BlynkSimpleEsp8266.h>
 #include <ESP8266WiFi.h>
 
-// --- กำหนดขาพินรีเลย์ ---
-#define RELAY_1 D1 // สปีด 1
-#define RELAY_2 D2 // สปีด 2
-#define RELAY_3 D3 // สปีด 3
-#define RELAY_4 D5 // ใช้ขา D5 ตามโค้ดเดิมของคุณ
+// ขารีเลย์
+#define BT1 D1 // ช่อง 1 (เว้นไว้ ไม่ใช้งาน)
+#define BT2 D2 // ช่อง 2 -> ใช้กับสปีด 1
+#define BT3 D3 // ช่อง 3 -> ใช้กับสปีด 2
+#define BT5 D5 // ช่อง 4 -> ใช้กับสปีด 3
 
 char auth[] = "XBzHPWNzCK_7bRzeVCQcleCkrb8we3TS";
 char ssid[] = "JAOSAMUT_2.4G";
 char pass[] = "09864261";
 
 BlynkTimer timer;
-
-// ตัวแปรนับเวลา
 long autoOffSeconds = 0;
 long autoOnSeconds = 0;
 int autoOnTargetSpeed = 1;
 
-// ฟังก์ชันปิดทุกอย่าง
+// ฟังก์ชันสำหรับสั่งปิดทุกอัน
 void turnOffAll() {
-  digitalWrite(RELAY_1, HIGH);
-  digitalWrite(RELAY_2, HIGH);
-  digitalWrite(RELAY_3, HIGH);
-  digitalWrite(RELAY_4, HIGH);
+  digitalWrite(BT1, HIGH); // ปิด D1 (ถึงจะเว้นไว้ก็สั่งปิดเพื่อความชัวร์)
+  digitalWrite(BT2, HIGH); // ปิด D2
+  digitalWrite(BT3, HIGH); // ปิด D3
+  digitalWrite(BT5, HIGH); // ปิด D5
   
-  // อัปเดตสถานะปุ่มในแอปให้ดับหมดก่อน
+  // รีเซ็ตไฟสถานะปุ่มในแอป Blynk
   Blynk.virtualWrite(V1, 0);
   Blynk.virtualWrite(V2, 0);
   Blynk.virtualWrite(V3, 0);
   Blynk.virtualWrite(V5, 0);
 }
 
-// ฟังก์ชันเปิดพัดลมตามเบอร์
 void setFanSpeed(int speed) {
-  turnOffAll(); 
+  turnOffAll(); // ตัดไฟทุกอันก่อนเสมอ
   
   if (speed == 0) {
-    Blynk.virtualWrite(V1, 1); // ถ้าสั่งปิด ให้ปุ่มเบอร์ 0 (V1) ติดไฟแจ้งสถานะ
-    return;
+    return; // สั่งปิด จบการทำงาน
   }
   
   switch (speed) {
     case 1:
-      digitalWrite(RELAY_1, LOW);
-      Blynk.virtualWrite(V2, 1); // ปุ่มเบอร์ 1 คือ V2
+      digitalWrite(BT2, LOW); // **ขยับมาใช้ D2 (เว้น D1 ไว้)**
+      Blynk.virtualWrite(V2, 1); 
       break;
     case 2:
-      digitalWrite(RELAY_2, LOW);
-      Blynk.virtualWrite(V3, 1); // ปุ่มเบอร์ 2 คือ V3
+      digitalWrite(BT3, LOW); // **ขยับมาใช้ D3**
+      Blynk.virtualWrite(V3, 1); 
       break;
     case 3:
-      digitalWrite(RELAY_4, LOW); // ใช้ D5 แทนตามบอร์ดคุณ
-      Blynk.virtualWrite(V5, 1); // ปุ่มเบอร์ 3 คือ V5
+      digitalWrite(BT5, LOW); // **ใช้ D5 (ช่องนี้ถูกอยู่แล้ว)**
+      Blynk.virtualWrite(V5, 1); 
       break;
   }
 }
 
-// ฟังก์ชันนับเวลาถอยหลัง (รันทุกๆ 1 วินาที)
 void timerTick() {
   if (autoOffSeconds > 0) {
     autoOffSeconds--;
-    if (autoOffSeconds == 0) {
-      Serial.println("Timer Triggered: Auto OFF");
-      setFanSpeed(0); 
-    }
+    if (autoOffSeconds == 0) setFanSpeed(0); 
   }
-  
   if (autoOnSeconds > 0) {
     autoOnSeconds--;
-    if (autoOnSeconds == 0) {
-      Serial.println("Timer Triggered: Auto ON");
-      setFanSpeed(autoOnTargetSpeed); 
-    }
+    if (autoOnSeconds == 0) setFanSpeed(autoOnTargetSpeed); 
   }
 }
 
 void setup() {
   Serial.begin(9600);
-  pinMode(RELAY_1, OUTPUT);
-  pinMode(RELAY_2, OUTPUT);
-  pinMode(RELAY_3, OUTPUT);
-  pinMode(RELAY_4, OUTPUT);
+  pinMode(BT1, OUTPUT);
+  pinMode(BT2, OUTPUT);
+  pinMode(BT3, OUTPUT);
+  pinMode(BT5, OUTPUT);
   
   turnOffAll(); 
   Blynk.begin(auth, ssid, pass);
-  timer.setInterval(1000L, timerTick); // สั่งให้นับเวลาทุกๆ 1000ms (1 วินาที)
+  timer.setInterval(1000L, timerTick); 
 }
 
 void loop() {
@@ -96,13 +84,13 @@ void loop() {
   timer.run(); 
 }
 
-// === รับคำสั่งจากปุ่มกดในแอป/เว็บ ===
-BLYNK_WRITE(V1) { if (param.asInt()) setFanSpeed(0); } // กด V1 = ปิด (เบอร์ 0)
-BLYNK_WRITE(V2) { if (param.asInt()) setFanSpeed(1); else setFanSpeed(0); } // กด V2 = เบอร์ 1
-BLYNK_WRITE(V3) { if (param.asInt()) setFanSpeed(2); else setFanSpeed(0); } // กด V3 = เบอร์ 2
-BLYNK_WRITE(V5) { if (param.asInt()) setFanSpeed(3); else setFanSpeed(0); } // กด V5 = เบอร์ 3
+// === รับคำสั่งจากหน้าเว็บ/แอป ===
+BLYNK_WRITE(V1) { if (param.asInt()) setFanSpeed(0); } // กดปุ่มปิด 
+BLYNK_WRITE(V2) { if (param.asInt()) setFanSpeed(1); else setFanSpeed(0); } 
+BLYNK_WRITE(V3) { if (param.asInt()) setFanSpeed(2); else setFanSpeed(0); } 
+BLYNK_WRITE(V5) { if (param.asInt()) setFanSpeed(3); else setFanSpeed(0); } 
 
-// === รับคำสั่งตั้งเวลา ===
+// === ระบบตั้งเวลา ===
 BLYNK_WRITE(V6) { autoOffSeconds = param.asInt(); }
 BLYNK_WRITE(V7) { autoOnSeconds = param.asInt(); }
 BLYNK_WRITE(V8) { 
