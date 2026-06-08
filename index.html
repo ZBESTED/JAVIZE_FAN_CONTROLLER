@@ -362,13 +362,21 @@
     }
 
     // 2. ฟังก์ชันเปิด/ปิดโหมดลมธรรมชาติ
+    // เพิ่มตัวแปรสำหรับนับการซ้ำของเบอร์พัดลม
+    let speedRepeatCount = 1;
+
     function toggleNaturalWind(fromFirebase = false) {
         if(!fromFirebase && navigator.vibrate) navigator.vibrate(50);
         
         if(naturalMode) {
+            // --- ปิดโหมดลมธรรมชาติ ---
             naturalMode = false;
             clearInterval(naturalInterval);
             document.getElementById('btn-natural').classList.remove('active');
+            
+            if (typeof manageWakeLock === 'function' && document.getElementById('badge-on').style.display === "none" && document.getElementById('badge-off').style.display === "none") {
+                manageWakeLock(false);
+            }
             
             if(!fromFirebase) {
                 setFan(currentFanPin, currentFanSpeed, false, true, true);
@@ -378,9 +386,13 @@
                 });
             }
         } else {
+            // --- เปิดโหมดลมธรรมชาติ ---
             naturalMode = true;
+            speedRepeatCount = 1; // เริ่มโหมดใหม่ ให้รีเซ็ตตัวนับการซ้ำเป็น 1 เสมอ
             document.getElementById('btn-natural').classList.add('active');
             clearInterval(naturalInterval); 
+            
+            if (typeof manageWakeLock === 'function') manageWakeLock(true);
             
             if(!fromFirebase) {
                 let updates = { naturalMode: true };
@@ -401,23 +413,40 @@
             }
             
             initTurnOnVisuals();
-            // เรียกใช้อัปเดต UI ตรงนี้ (พอไม่มีมันเลยค้าง Fetching data)
             updateNaturalWindUI(currentFanSpeed);
             
             naturalInterval = setInterval(() => {
                 triggerRandomSpeed(false); 
-            }, 10000); 
+            }, 8000); 
         }
     }
 
-    // 3. ฟังก์ชันสุ่มเบอร์พัดลม
     function triggerRandomSpeed(fromFirebase = false) {
         if(!naturalMode) return;
         
         const speeds = [ { pin: 'V2', speed: 1 }, { pin: 'V3', speed: 2 }, { pin: 'V5', speed: 3 } ];
-        const rand = speeds[Math.floor(Math.random() * speeds.length)];
+        let rand;
+        
+        // ตรวจสอบว่าเบอร์เดิมซ้ำมา 2 รอบหรือยัง
+        if (speedRepeatCount >= 2) {
+            // ถ้าซ้ำมา 2 ครั้งแล้ว (เช่น 3 -> 3) ครั้งที่ 3 บังคับให้สุ่มเบอร์อื่นที่ไม่ใช่เบอร์เดิม
+            const availableSpeeds = speeds.filter(s => s.speed !== currentFanSpeed);
+            rand = availableSpeeds[Math.floor(Math.random() * availableSpeeds.length)];
+            speedRepeatCount = 1; // เปลี่ยนเบอร์แล้ว รีเซ็ตตัวนับกลับเป็น 1
+        } else {
+            // ถ้ายังซ้ำไม่ถึง 2 ครั้ง ให้สุ่มแบบอิสระทั้งหมด (มีโอกาสได้เบอร์เดิม)
+            rand = speeds[Math.floor(Math.random() * speeds.length)];
+            
+            // เช็คว่าสุ่มได้เบอร์เดิมไหม เพื่ออัปเดตตัวนับ
+            if (rand.speed === currentFanSpeed) {
+                speedRepeatCount++; // สุ่มได้เบอร์เดิม บวกตัวนับเพิ่ม
+            } else {
+                speedRepeatCount = 1; // สุ่มได้เบอร์ใหม่ รีเซ็ตตัวนับเป็น 1
+            }
+        }
         
         if (currentFanSpeed !== rand.speed) {
+            // ถ้าเบอร์เปลี่ยน ส่งคำสั่งไปรีเลย์และอัปเดตหน้าจอ
             currentFanSpeed = rand.speed;
             currentFanPin = rand.pin;
             updateNaturalWindUI(rand.speed);
@@ -427,10 +456,11 @@
                 fanStateRef.update({ speed: rand.speed, pin: rand.pin });
             }
         } else {
+            // ถ้าสุ่มได้เบอร์เดิม (ที่ยังซ้ำไม่เกินโควต้า) แค่อัปเดตไฟกระพริบที่หน้าจอ 
+            // โดยไม่ต้องส่งคำสั่งกระชากรีเลย์ซ้ำให้บอร์ดพัง
             updateNaturalWindUI(currentFanSpeed);
         }
     }
-
     function setFan(pin, speed, isAuto = false, syncOnly = false, fromFirebase = false) {
         if(!isAuto && !syncOnly && navigator.vibrate) navigator.vibrate(50);
         
